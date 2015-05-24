@@ -10,7 +10,6 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("restart", this.restart.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
   this.inputManager.gameManager = this;
-  window.game = this;
 
   this.setup();
 }
@@ -190,69 +189,6 @@ GameManager.prototype.move = function (direction) {
 
     this.actuate();
   }
-};
-
-GameManager.prototype.availableMoves = function() {
-  var self = this;
-
-  if (this.isGameTerminated()) return []; // Don't do anything if the game's over
-
-  var cell, tile;
-
-  var available  = [];
-
-  // Save the current tile positions and remove merger information
-  //this.prepareTiles();
-
-  // Never ever use labels and goto's. Except when hacking big time.
-  outside:
-  for (var direction in [0, 1, 2, 3]) {
-    var vector     = this.getVector(direction);
-    var traversals = this.buildTraversals(vector);
-
-    // Traverse the grid in the right direction and move tiles
-    for (var x in traversals.x) {
-      for (var y in traversals.y) {
-        cell = { x: x, y: y };
-        tile = self.grid.cellContent(cell);
-
-        if (tile) {
-          var positions = self.findFarthestPosition(cell, vector);
-          var next      = self.grid.cellContent(positions.next);
-
-          // Only one merger per row traversal?
-          if (next && next.value === tile.value && !next.mergedFrom) {
-            var merged = new Tile(positions.next, tile.value * 2);
-            merged.mergedFrom = [tile, next];
-
-            self.grid.insertTile(merged);
-            self.grid.removeTile(tile);
-
-            // Converge the two tiles' positions
-            tile.updatePosition(positions.next);
-
-            // Update the score
-            self.score += merged.value;
-
-            // The mighty 2048 tile
-            if (merged.value === 2048) self.won = true;
-          } else {
-            // no merging, then move
-            if (!self.positionsEqual(tile, positions.farthest)) {
-              available.push(direction);
-              continue outside;
-            }
-          }
-
-          if (!self.positionsEqual(cell, tile)) {
-            moved = true; // The tile moved from its original cell!
-          }
-        }
-      });
-    });
-  }
-
-  return available;
 };
 
 // Get the vector representing the chosen direction

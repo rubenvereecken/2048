@@ -24,6 +24,7 @@ KeyboardInputManager.prototype.on = function (event, callback) {
 
 KeyboardInputManager.prototype.emit = function (event, data) {
   var callbacks = this.events[event];
+  console.log(this.events);
   if (callbacks) {
     callbacks.forEach(function (callback) {
       callback(data);
@@ -72,6 +73,7 @@ KeyboardInputManager.prototype.listen = function () {
   this.bindButtonPress(".retry-button", this.restart);
   this.bindButtonPress(".restart-button", this.restart);
   this.bindButtonPress(".keep-playing-button", this.keepPlaying);
+  this.bindButtonPress(".start-learner", this.startLearner);
 
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
@@ -125,6 +127,12 @@ KeyboardInputManager.prototype.listen = function () {
       self.emit("move", absDx > absDy ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0));
     }
   });
+};
+
+KeyboardInputManager.prototype.startLearner = function (event) {
+  event.preventDefault();
+  console.debug('start da learnahh');
+  this.emit("startLearner");
 };
 
 KeyboardInputManager.prototype.restart = function (event) {
