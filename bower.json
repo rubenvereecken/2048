@@ -1,0 +1,25 @@
+{
+  "name": "2048 Reinforcement Learner",
+  "version": "0.0.0",
+  "homepage": "https://github.com/rubenvereecken/2048",
+  "authors": [
+    "Ruben Vereecken <rubenvereecken@gmail.com>"
+  ],
+  "keywords": [
+    "2048",
+    "ai",
+    "learner"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "lodash": "~3.9.0"
+  }
+}
