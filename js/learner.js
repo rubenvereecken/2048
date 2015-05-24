@@ -99,6 +99,9 @@ Learner.prototype.actuate = function (grid, state) {
   this.grid = grid;
   this.state = state;
 
+  //console.log(this.gameManager.movesAvailable());
+
+
   // visualize
   if (!state.dontVisualize)
     this.actuator.actuate.apply(this.actuator, arguments);

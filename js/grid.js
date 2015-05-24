@@ -115,10 +115,3 @@ Grid.prototype.serialize = function () {
     cells: cellState
   };
 };
-
-/**
- *
- */
-Grid.prototype.availableMoves = function() {
-
-}
