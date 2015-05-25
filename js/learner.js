@@ -143,6 +143,7 @@ Learner.prototype.start = function (rounds) {
 Learner.prototype.stop = function () {
   console.debug("AI stopped");
   this.running = false;
+  this.roundsLeft = 0;
   this.storageManager.setBestScore(0);
   this.save();  // save AI state
 }
@@ -163,8 +164,6 @@ Learner.prototype.restart = function (event) {
   }
   Learner.__super__.restart.apply(this, arguments);
 };
-
-
 
 /**
  *
