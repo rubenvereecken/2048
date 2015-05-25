@@ -29,7 +29,7 @@ Learner = (function(__super) {
     this.roundsLeft = this.originalRounds;
     $('#learner-rounds').val(this.originalRounds);
 
-    this.state = this.storageManager.get('learner-state') || {TODO: true};
+    this.state = this.storageManager.get('learner-state') || this.beginState();
 
     this.inputManager.on("startLearner", this.start.bind(this));
     this.inputManager.on("stopLearner", this.stop.bind(this));
@@ -66,7 +66,7 @@ Learner.prototype.toggleVisual = function (on) {
   this.visual = on;
   this.storageManager.set('visual', on);
   if (this.visual) this.actuate();
-  else this.actuator.actuate( new Grid(), {
+  else this.actuator.actuate( new Grid(this.size), {
     score: 0,
     bestScore: 0
   });
@@ -121,13 +121,17 @@ Learner.prototype.think = function () {
   else _.defer(thinkRandom);
 };
 
+Learner.prototype.beginState = function() {
+  return {placeholder: "This is where the state should come"};
+};
+
 /**
  * Resets the internal state of the AI
  */
 Learner.prototype.reset = function() {
   console.debug("AI reset");
   this.storageManager.setBestScore(0);
-  this.loadState({});
+  this.loadState(this.beginState());
   this.showState();
 }
 
