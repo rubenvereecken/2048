@@ -514,6 +514,12 @@ hr {
   margin-left: 20px;
 }
 
+#logger {
+  overflow: auto;
+  resize: none;
+  outline: none;
+}
+
 .game-explanation {
   margin-top: 50px; }
 

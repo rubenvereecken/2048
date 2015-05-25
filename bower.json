@@ -21,6 +21,8 @@
   ],
   "dependencies": {
     "lodash": "~3.9.0",
-    "zepto": "~1.1.6"
+    "zepto": "~1.1.6",
+    "jquery-notebook": "*",
+    "jquery": "~2.1.4"
   }
 }

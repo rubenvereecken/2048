@@ -14,7 +14,7 @@ Learner = (function(__super) {
     return child;
   })(Learner, __super);
 
-  function Learner() {
+  function Learner(size, _, _, _) {
     Learner.__super__.constructor.apply(this, arguments);
 
     this.running = false;
@@ -66,13 +66,13 @@ Learner.prototype.think = function () {
  * @param event
  */
 Learner.prototype.start = function () {
-  console.debug("start AI");
+  console.debug("AI started");
   this.running = true;
   this.think();
 }
 
 Learner.prototype.stop = function () {
-  console.debug("start AI");
+  console.debug("AI stopped");
   this.running = false;
 }
 
