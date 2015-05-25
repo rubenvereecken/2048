@@ -70,7 +70,7 @@ Learner.prototype.think = function () {
   var self = this;
   _.delay(function() {
     self.move(_.random(0, 3));
-  }, 100);
+  }, 1);
 };
 
 Learner.prototype.reset = function() {

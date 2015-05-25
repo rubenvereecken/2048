@@ -82,12 +82,13 @@ GameManager.prototype.actuate = function () {
     this.storageManager.setBestScore(this.score);
   }
 
-  // Clear the state when the game is over (game over only, not win)
-  if (this.over) {
+  // stop storing continuously to save some time
+
+  /*if (this.over) {
     this.storageManager.clearGameState();
   } else {
     this.storageManager.setGameState(this.serialize());
-  }
+  }*/
 
   this.actuator.actuate(this.grid, {
     score:      this.score,
