@@ -499,7 +499,12 @@ hr {
   text-align: center;
   float: right;
   margin-left: 10px;
+}
 
+#learner-rounds {
+  width: 50px;
+  margin-left: 20px;
+  text-align: right;
 }
 
 .load-state {
@@ -515,6 +520,14 @@ hr {
   text-align: center;
   float: right;
   margin-top: -10px;
+}
+
+.options {
+  float: right;
+}
+
+.controls {
+  float: right;
 }
 
 #logger, #learner-state {

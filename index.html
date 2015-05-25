@@ -29,10 +29,18 @@
     </div>
 
     <div class="above-game">
-      <input class="toggle-visual" type="checkbox">Visual AI</input>
-      <a class="toggle-learner">Start AI</a>
-      <a class="reset-learner">Reset AI</a>
-      <a class="restart-button">New Game</a>
+      <div class="options">
+        <input id="toggle-visual" type="checkbox">Visual AI</input>
+        <input id="learner-rounds" type="input" value="50"/>
+        <label for="learner-rounds">AI games</label>
+      </div>
+      <hr style="visibility: hidden;"/>
+      <div class="controls+">
+        <a class="toggle-learner">Start AI</a>
+        <a class="reset-learner">Reset AI</a>
+  <!--      <a class="restart-button">New Game</a>-->
+        <a class="save-learner">Save AI</a>
+      </div>
     </div>
 
     <div class="game-container">

@@ -61,3 +61,12 @@ LocalStorageManager.prototype.setGameState = function (gameState) {
 LocalStorageManager.prototype.clearGameState = function () {
   this.storage.removeItem(this.gameStateKey);
 };
+
+LocalStorageManager.prototype.get = function(key) {
+  var json = this.storage.getItem(key);
+  return json ? JSON.parse(json) : null;
+}
+
+LocalStorageManager.prototype.set = function(key, val) {
+  this.storage.setItem(key, JSON.stringify(val));
+}

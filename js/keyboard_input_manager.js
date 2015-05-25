@@ -63,12 +63,13 @@ KeyboardInputManager.prototype.listen = function () {
 
   // Respond to button presses
   this.bindButtonPress(".retry-button", this.restart);
-  this.bindButtonPress(".restart-button", this.restart);
+/*  this.bindButtonPress(".restart-button", this.restart);*/
   this.bindButtonPress(".keep-playing-button", this.keepPlaying);
   this.bindButtonPress(".toggle-learner", this.toggleLearner);
+  this.bindButtonPress(".save-learner", this.saveLearner);
   this.bindButtonPress(".reset-learner", this.resetLearner);
   this.bindButtonPress(".load-state", this.loadState);
-  this.bindButtonPress(".toggle-visual", this.toggleVisual);
+  this.bindButtonPress("#toggle-visual", this.toggleVisual);
 
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
@@ -135,7 +136,8 @@ KeyboardInputManager.prototype.toggleLearner = function (event) {
   } else {
     btn.text("Stop AI");
     game.addClass('started-learner');
-    this.emit("startLearner");
+    var rounds = parseInt($('#learner-rounds').val());
+    this.emit("startLearner", rounds);
   }
 };
 
@@ -163,6 +165,11 @@ KeyboardInputManager.prototype.loadState = function (event) {
 KeyboardInputManager.prototype.restart = function (event) {
   event.preventDefault();
   this.emit("restart");
+};
+
+KeyboardInputManager.prototype.saveLearner = function (event) {
+  event.preventDefault();
+  this.emit("saveLearner");
 };
 
 KeyboardInputManager.prototype.keepPlaying = function (event) {

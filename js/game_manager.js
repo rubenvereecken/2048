@@ -11,7 +11,8 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
   this.inputManager.gameManager = this;
 
-  this.setup();
+  // this is where I stopped caring
+  //this.setup();
 }
 
 // Restart the game
@@ -34,7 +35,9 @@ GameManager.prototype.isGameTerminated = function () {
 
 // Set up the game
 GameManager.prototype.setup = function () {
-  var previousState = this.storageManager.getGameState();
+  // don't care about previous games
+  //var previousState = this.storageManager.getGameState();
+  var previousState = null;
 
   // Reload the game from a previous game if present
   if (previousState) {
