@@ -65,7 +65,7 @@ Learner.prototype.loadState = function (state) {
 Learner.prototype.toggleVisual = function (on) {
   this.visual = on;
   this.storageManager.set('visual', on);
-  if (this.visual) this.actuate();
+  if (this.visual && this.running) this.actuate();
   else this.actuator.actuate( new Grid(this.size), {
     score: 0,
     bestScore: 0
