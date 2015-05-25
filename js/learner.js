@@ -17,6 +17,7 @@ Learner = (function(__super) {
   function Learner(size, _, _, _) {
     this.running = false;
     this.state = {TODO: true};
+    this.visual = false;
 
     Learner.__super__.constructor.apply(this, arguments);
 
@@ -24,6 +25,7 @@ Learner = (function(__super) {
     this.inputManager.on("stopLearner", this.stop.bind(this));
     this.inputManager.on("resetLearner", this.reset.bind(this));
     this.inputManager.on("loadState", this.loadState.bind(this));
+    this.inputManager.on("toggleVisual", this.toggleVisual.bind(this));
   }
 
   return Learner;
@@ -49,6 +51,16 @@ Learner.prototype.serializeState = function () {
 Learner.prototype.loadState = function (state) {
   this.state = state;
   this.showState();
+  console.info("Successfully loaded state");
+};
+
+Learner.prototype.toggleVisual = function (on) {
+  this.visual = on;
+  if (this.visual) this.actuate();
+  else this.actuator.actuate( new Grid(), {
+    score: 0,
+    bestScore: 0
+  });
 };
 
 Learner.prototype.showState = function() {
@@ -113,11 +125,6 @@ Learner.prototype.restart = function (event) {
   Learner.__super__.restart.apply(this, arguments);
 };
 
-Learner.prototype.keepPlaying = function (event) {
-  event.preventDefault();
-  console.debug("keep playing");
-  this.emit("keepPlaying");
-}
 
 
 /**
@@ -133,27 +140,12 @@ Learner.prototype.keepPlaying = function (event) {
     }
  */
 
-Learner.prototype.dsactuate = function (grid, state) {
+Learner.prototype.actuate = function (grid, state) {
   console.log(arguments);
-  // gets value updates
-  var self = this;
-
-  if (this.started) {
-    _.delay(function() {
-      self.move(randomMove());
-    }, 500);
+  if (this.visual) {
+    Learner.__super__.actuate.apply(this, arguments);
   }
-
-  this.grid = grid;
-  this.state = state;
-
-  //console.log(this.gameManager.movesAvailable());
-
-
-  // visualize
-  if (!state.dontVisualize)
-    this.actuator.actuate.apply(this.actuator, arguments);
-}
+};
 
 Learner.prototype.availableMoves = function() {
   var self = this;

@@ -39,15 +39,7 @@ KeyboardInputManager.prototype.listen = function () {
     38: 0, // Up
     39: 1, // Right
     40: 2, // Down
-    37: 3, // Left
-    75: 0, // Vim up
-    76: 1, // Vim right
-    74: 2, // Vim down
-    72: 3, // Vim left
-    87: 0, // W
-    68: 1, // D
-    83: 2, // S
-    65: 3  // A
+    37: 3 // Left
   };
 
   // Respond to direction keys
@@ -76,6 +68,7 @@ KeyboardInputManager.prototype.listen = function () {
   this.bindButtonPress(".toggle-learner", this.toggleLearner);
   this.bindButtonPress(".reset-learner", this.resetLearner);
   this.bindButtonPress(".load-state", this.loadState);
+  this.bindButtonPress(".toggle-visual", this.toggleVisual);
 
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
@@ -151,13 +144,18 @@ KeyboardInputManager.prototype.resetLearner = function (event) {
   this.emit("resetLearner");
 };
 
+KeyboardInputManager.prototype.toggleVisual = function (event) {
+  console.log(event);
+  this.emit("toggleVisual", $(event.target).attr('checked'));
+};
+
 KeyboardInputManager.prototype.loadState = function (event) {
   event.preventDefault();
   var state = null;
   try {
     state = JSON.parse($('#learner-state').val());
   } catch (e) {
-    return console.error(e);
+    return console.error(e.constructor.name + ': ' + e.message);
   }
   this.emit("loadState", state);
 };
