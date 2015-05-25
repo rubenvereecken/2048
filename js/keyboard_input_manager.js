@@ -126,8 +126,9 @@ KeyboardInputManager.prototype.listen = function () {
 };
 
 KeyboardInputManager.prototype.toggleLearner = function (event) {
-  event.preventDefault();
-  var btn = $(event.target);
+  if (event)
+    event.preventDefault();
+  var btn = $('.toggle-learner');
   var game = $('.game-container');
   if (game.hasClass("started-learner")) {
     game.removeClass('started-learner');
@@ -140,6 +141,8 @@ KeyboardInputManager.prototype.toggleLearner = function (event) {
     this.emit("startLearner", rounds);
   }
 };
+
+
 
 KeyboardInputManager.prototype.resetLearner = function (event) {
   event.preventDefault();

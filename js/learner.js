@@ -30,11 +30,10 @@ Learner = (function(__super) {
     this.inputManager.on("startLearner", this.start.bind(this));
     this.inputManager.on("stopLearner", this.stop.bind(this));
     this.inputManager.on("saveLearner", this.save.bind(this));
-    //this.inputManager.on("resetLearner", this.reset.bind(this));
+    this.inputManager.on("resetLearner", this.reset.bind(this));
     this.inputManager.on("loadState", this.loadState.bind(this));
     this.inputManager.on("toggleVisual", this.toggleVisual.bind(this));
 
-    this.setup();
   }
 
   return Learner;
@@ -114,6 +113,7 @@ Learner.prototype.think = function () {
 
 Learner.prototype.reset = function() {
   console.debug("AI reset");
+  this.storageManager.setBestScore(0);
   this.loadState({});
   this.showState();
 }
@@ -132,10 +132,9 @@ Learner.prototype.start = function (rounds) {
   this.roundsLeft = rounds;
   this.originalRounds = rounds;
   this.storageManager.set('rounds', rounds);
-
   this.running = true;
   this.showState();
-  // TODO maybe we don't want to reset? worth a thought
+  // TODO maybe we don't want to restart? worth a thought
   this.restart();
   this.think();
 }
@@ -153,10 +152,11 @@ Learner.prototype.stop = function () {
 Learner.prototype.restart = function (event) {
   console.debug("restart");
   if (this.roundsLeft <= 0) {
+    this.inputManager.toggleLearner();
     return console.info("Finished " + this.originalRounds + " rounds.");
   } else {
     this.roundsLeft -= 1;
-    console.info("Round " + this.originalRounds - this.roundsLeft + "/" + this.originalRounds);
+    console.info("Round " + (this.originalRounds - this.roundsLeft) + "/" + this.originalRounds);
   }
   Learner.__super__.restart.apply(this, arguments);
 };
@@ -176,8 +176,12 @@ Learner.prototype.restart = function (event) {
     }
  */
 
-Learner.prototype.actuate = function (grid, state) {
+Learner.prototype.actuate = function () {
   //console.log(arguments);
+  if (this.over) {
+    this.restart();
+  }
+
   if (this.visual) {
     Learner.__super__.actuate.apply(this, arguments);
   }
