@@ -93,15 +93,24 @@ Learner.prototype.move = function (where) {
 
   // TODO after-move logic in here
 
-  this.think();
-};
+  // stopping is for pussies;
+  if (this.won) {
+    // not tested yet
+    this.keepPlaying();
+  }
 
+  if (this.over) {
+    // Custom logic if it's over? Maybe AI needs it
+    this.restart();
+  } else {
+    this.think();
+  }
+};
 
 Learner.prototype.think = function () {
   if (!this.running) return;
 
   var self = this;
-
   var thinkRandom = function() {
     self.move(_.random(0, 3));
   };
@@ -137,14 +146,14 @@ Learner.prototype.start = function (rounds) {
   this.showState();
   // TODO maybe we don't want to restart? worth a thought
   this.restart();
-  this.think();
-}
+};
 
 Learner.prototype.stop = function () {
   console.debug("AI stopped");
   this.running = false;
   this.roundsLeft = 0;
   this.storageManager.setBestScore(0);
+  this.showState();
   this.save();  // save AI state
 }
 
@@ -163,6 +172,7 @@ Learner.prototype.restart = function (event) {
     console.info("Round " + (this.originalRounds - this.roundsLeft) + "/" + this.originalRounds);
   }
   Learner.__super__.restart.apply(this, arguments);
+  this.think();
 };
 
 /**
@@ -179,18 +189,7 @@ Learner.prototype.restart = function (event) {
  */
 
 Learner.prototype.actuate = function () {
-  if (this.over) {
-    // restart will stop when it needs to
-    Learner.__super__.actuate.apply(this, arguments);
-    this.restart();
-  }
-
-  // stopping is for pussies;
-  if (this.won) {
-    this.keepPlaying();
-  }
-
-  if (this.visual) {
+  if (this.visual || this.over) {
     Learner.__super__.actuate.apply(this, arguments);
   }
 };
