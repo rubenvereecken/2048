@@ -14,7 +14,10 @@ Learner = (function(__super) {
     return child;
   })(Learner, __super);
 
-  function Learner(size, _, _, _) {
+  /**
+   * @constructor
+   */
+  function Learner() {
     this.running = false;
     this.visualDelay = 5;
 
@@ -40,11 +43,6 @@ Learner = (function(__super) {
 
   return Learner;
 })(GameManager);
-
-
-
-
-//__extends(Learner, GameManager);
 
 Learner.moves = {
   up: 0,
@@ -145,6 +143,7 @@ Learner.prototype.start = function (rounds) {
 Learner.prototype.stop = function () {
   console.debug("AI stopped");
   this.running = false;
+  this.storageManager.setBestScore(0);
   this.save();  // save AI state
 }
 
