@@ -75,6 +75,7 @@ KeyboardInputManager.prototype.listen = function () {
   this.bindButtonPress(".keep-playing-button", this.keepPlaying);
   this.bindButtonPress(".toggle-learner", this.toggleLearner);
   this.bindButtonPress(".reset-learner", this.resetLearner);
+  this.bindButtonPress(".load-state", this.loadState);
 
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
@@ -148,7 +149,18 @@ KeyboardInputManager.prototype.toggleLearner = function (event) {
 KeyboardInputManager.prototype.resetLearner = function (event) {
   event.preventDefault();
   this.emit("resetLearner");
-}
+};
+
+KeyboardInputManager.prototype.loadState = function (event) {
+  event.preventDefault();
+  var state = null;
+  try {
+    state = JSON.parse($('#learner-state').val());
+  } catch (e) {
+    return console.error(e);
+  }
+  this.emit("loadState", state);
+};
 
 KeyboardInputManager.prototype.restart = function (event) {
   event.preventDefault();
