@@ -24,7 +24,6 @@ KeyboardInputManager.prototype.on = function (event, callback) {
 
 KeyboardInputManager.prototype.emit = function (event, data) {
   var callbacks = this.events[event];
-  console.log(this.events);
   if (callbacks) {
     callbacks.forEach(function (callback) {
       callback(data);
@@ -142,7 +141,15 @@ KeyboardInputManager.prototype.toggleLearner = function (event) {
   }
 };
 
-
+KeyboardInputManager.prototype.stopLearner = function (event) {
+  if (event)
+    event.preventDefault();
+  var btn = $('.toggle-learner');
+  var game = $('.game-container');
+  game.removeClass('started-learner');
+  btn.text("Start AI");
+  this.emit("stopLearner");
+};
 
 KeyboardInputManager.prototype.resetLearner = function (event) {
   event.preventDefault();
@@ -150,8 +157,7 @@ KeyboardInputManager.prototype.resetLearner = function (event) {
 };
 
 KeyboardInputManager.prototype.toggleVisual = function (event) {
-  console.log(event);
-  this.emit("toggleVisual", $(event.target).attr('checked'));
+  this.emit("toggleVisual", $(event.target).prop('checked'));
 };
 
 KeyboardInputManager.prototype.loadState = function (event) {

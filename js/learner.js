@@ -16,7 +16,6 @@ Learner = (function(__super) {
 
   function Learner(size, _, _, _) {
     this.running = false;
-    this.state = {TODO: true};
     this.visualDelay = 5;
 
     Learner.__super__.constructor.apply(this, arguments);
@@ -27,6 +26,8 @@ Learner = (function(__super) {
     this.roundsLeft = this.originalRounds;
     $('#learner-rounds').val(this.originalRounds);
 
+    this.state = this.storageManager.get('learner-state') || {TODO: true};
+
     this.inputManager.on("startLearner", this.start.bind(this));
     this.inputManager.on("stopLearner", this.stop.bind(this));
     this.inputManager.on("saveLearner", this.save.bind(this));
@@ -34,6 +35,7 @@ Learner = (function(__super) {
     this.inputManager.on("loadState", this.loadState.bind(this));
     this.inputManager.on("toggleVisual", this.toggleVisual.bind(this));
 
+    this.showState();
   }
 
   return Learner;
@@ -59,7 +61,7 @@ Learner.prototype.serializeState = function () {
 Learner.prototype.loadState = function (state) {
   this.state = state;
   this.showState();
-  console.info("Successfully loaded state");
+  console.debug("Successfully loaded state");
 };
 
 Learner.prototype.toggleVisual = function (on) {
@@ -84,7 +86,8 @@ Learner.prototype.serialize = function() {
 };
 
 Learner.prototype.save = function() {
-
+  this.storageManager.set("learner-state", this.state);
+  console.info("Successfully saved AI state");
 };
 
 Learner.prototype.move = function (where) {
@@ -142,6 +145,7 @@ Learner.prototype.start = function (rounds) {
 Learner.prototype.stop = function () {
   console.debug("AI stopped");
   this.running = false;
+  this.save();  // save AI state
 }
 
 /**
@@ -152,8 +156,8 @@ Learner.prototype.stop = function () {
 Learner.prototype.restart = function (event) {
   console.debug("restart");
   if (this.roundsLeft <= 0) {
-    this.inputManager.toggleLearner();
-    return console.info("Finished " + this.originalRounds + " rounds.");
+    console.info("Finished " + this.originalRounds + " rounds.");
+    return this.inputManager.stopLearner();
   } else {
     this.roundsLeft -= 1;
     console.info("Round " + (this.originalRounds - this.roundsLeft) + "/" + this.originalRounds);
@@ -177,9 +181,15 @@ Learner.prototype.restart = function (event) {
  */
 
 Learner.prototype.actuate = function () {
-  //console.log(arguments);
   if (this.over) {
+    // restart will stop when it needs to
+    Learner.__super__.actuate.apply(this, arguments);
     this.restart();
+  }
+
+  // stopping is for pussies;
+  if (this.won) {
+    this.keepPlaying();
   }
 
   if (this.visual) {
