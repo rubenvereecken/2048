@@ -43,20 +43,10 @@ KeyboardInputManager.prototype.listen = function () {
 
   // Respond to direction keys
   document.addEventListener("keydown", function (event) {
-    var modifiers = event.altKey || event.ctrlKey || event.metaKey ||
-                    event.shiftKey;
-    var mapped    = map[event.which];
 
-    if (!modifiers) {
-      if (mapped !== undefined) {
-        event.preventDefault();
-        self.emit("move", mapped);
-      }
-    }
-
-    // R key restarts the game
-    if (!modifiers && event.which === 82) {
-      self.restart.call(self, event);
+    // S starts or stops AI
+    if (event.which === 83) {
+      self.toggleLearner.call(self, event);
     }
   });
 

@@ -121,6 +121,9 @@ Learner.prototype.think = function () {
   else _.defer(thinkRandom);
 };
 
+/**
+ * Resets the internal state of the AI
+ */
 Learner.prototype.reset = function() {
   console.debug("AI reset");
   this.storageManager.setBestScore(0);
