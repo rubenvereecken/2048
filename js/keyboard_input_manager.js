@@ -73,7 +73,7 @@ KeyboardInputManager.prototype.listen = function () {
   this.bindButtonPress(".retry-button", this.restart);
   this.bindButtonPress(".restart-button", this.restart);
   this.bindButtonPress(".keep-playing-button", this.keepPlaying);
-  this.bindButtonPress(".start-learner", this.startLearner);
+  this.bindButtonPress(".toggle-learner", this.toggleLearner);
 
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
@@ -129,10 +129,19 @@ KeyboardInputManager.prototype.listen = function () {
   });
 };
 
-KeyboardInputManager.prototype.startLearner = function (event) {
+KeyboardInputManager.prototype.toggleLearner = function (event) {
   event.preventDefault();
-  console.debug('start da learnahh');
-  this.emit("startLearner");
+  var btn = $(event.target);
+  var game = $('.game-container');
+  if (game.hasClass("started-learner")) {
+    game.removeClass('started-learner');
+    btn.text("Start AI");
+    this.emit("stopLearner");
+  } else {
+    btn.text("Stop AI");
+    game.addClass('started-learner');
+    this.emit("startLearner");
+  }
 };
 
 KeyboardInputManager.prototype.restart = function (event) {

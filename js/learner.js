@@ -17,8 +17,10 @@ Learner = (function(__super) {
   function Learner() {
     Learner.__super__.constructor.apply(this, arguments);
 
-    this.inputManager.on("startLearner", this.start.bind(this));
+    this.running = false;
 
+    this.inputManager.on("startLearner", this.start.bind(this));
+    this.inputManager.on("stopLearner", this.stop.bind(this));
   }
 
   return Learner;
@@ -50,10 +52,12 @@ Learner.prototype.move = function (where) {
 };
 
 Learner.prototype.think = function () {
+  if (!this.running) return;
+
   var self = this;
   _.delay(function() {
     self.move(_.random(0, 3));
-  }, 500);
+  }, 100);
 };
 
 
@@ -63,9 +67,14 @@ Learner.prototype.think = function () {
  */
 Learner.prototype.start = function () {
   console.debug("start AI");
+  this.running = true;
   this.think();
 }
 
+Learner.prototype.stop = function () {
+  console.debug("start AI");
+  this.running = false;
+}
 
 /**
  * Called to restart a single game run
