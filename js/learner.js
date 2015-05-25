@@ -21,6 +21,7 @@ Learner = (function(__super) {
 
     this.inputManager.on("startLearner", this.start.bind(this));
     this.inputManager.on("stopLearner", this.stop.bind(this));
+    this.inputManager.on("resetLearner", this.reset.bind(this));
   }
 
   return Learner;
@@ -38,13 +39,25 @@ Learner.moves = {
   left: 3
 };
 
+Learner.prototype.serializeState = function () {
+  // TODO this is where we can serialize learner state like function params
+  return {TODO: true};
+};
+
+Learner.prototype.fromState = function (state) {
+  // TODO load internal state
+};
+
+Learner.prototype.showState = function() {
+  this.actuator.showState(this.serializeState());
+};
+
 Learner.prototype.serialize = function() {
   var s = Learner.__super__.serialize.apply(this, arguments);
   // TODO
   // if any inner state has to be saved do it here
-  return s;
+  return _.extend(s, this.serializeState());
 };
-
 
 Learner.prototype.move = function (where) {
   Learner.__super__.move.apply(this, arguments);
@@ -60,6 +73,16 @@ Learner.prototype.think = function () {
   }, 100);
 };
 
+Learner.prototype.reset = function() {
+  console.debug("AI reset");
+  this.fromState({});
+  this.showState();
+}
+
+Learner.prototype.setup = function() {
+  Learner.__super__.setup.apply(this, arguments);
+  this.showState();
+}
 
 /**
  * Called to start the learner
@@ -68,6 +91,7 @@ Learner.prototype.think = function () {
 Learner.prototype.start = function () {
   console.debug("AI started");
   this.running = true;
+  this.showState();
   this.think();
 }
 

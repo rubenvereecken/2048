@@ -35,6 +35,10 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
   });
 };
 
+HTMLActuator.prototype.showState = function (state) {
+  $('#learner-state').val(JSON.stringify(state, null, 2));
+};
+
 // Continues the game (both restart and keep playing)
 HTMLActuator.prototype.continueGame = function () {
   this.clearMessage();

@@ -486,20 +486,7 @@ hr {
   line-height: 42px;
   margin-bottom: 0; }
 
-.restart-button {
-  display: inline-block;
-  background: #8f7a66;
-  border-radius: 3px;
-  padding: 0 20px;
-  text-decoration: none;
-  color: #f9f6f2;
-  height: 40px;
-  line-height: 42px;
-  display: block;
-  text-align: center;
-  float: right; }
-
-.toggle-learner {
+.above-game a {
   display: inline-block;
   background: #8f7a66;
   border-radius: 3px;
@@ -511,10 +498,26 @@ hr {
   display: block;
   text-align: center;
   float: right;
-  margin-left: 20px;
+  margin-left: 10px;
+
 }
 
-#logger {
+.load-state {
+  display: inline-block;
+  background: #8f7a66;
+  border-radius: 3px;
+  padding: 0 20px;
+  text-decoration: none;
+  color: #f9f6f2;
+  height: 40px;
+  line-height: 42px;
+  display: block;
+  text-align: center;
+  float: left;
+  margin-right: 20px;
+}
+
+#logger, #learner-state {
   overflow: auto;
   resize: none;
   outline: none;
