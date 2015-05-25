@@ -41,7 +41,8 @@ KeyboardInputManager.prototype.listen = function () {
     if (event.which === 83) {
       self.toggleLearner.call(self, event);
     } else if  (event.which === 86) {
-
+      $("#toggle-visual").prop('checked', !$("#toggle-visual").prop('checked'));
+      self.toggleVisual.call(self, event);
     }
   });
 
@@ -88,8 +89,8 @@ KeyboardInputManager.prototype.resetLearner = function (event) {
   this.emit("resetLearner");
 };
 
-KeyboardInputManager.prototype.toggleVisual = function (event) {
-  this.emit("toggleVisual", $(event.target).prop('checked'));
+KeyboardInputManager.prototype.toggleVisual = function () {
+  this.emit("toggleVisual", $("#toggle-visual").prop('checked'));
 };
 
 KeyboardInputManager.prototype.loadState = function (event) {
