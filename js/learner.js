@@ -56,7 +56,7 @@ Learner.parameters = {
   gamma: 0.9,
   lambda: 0.1,
   epsilon: 0.1,
-  featureSize: 15
+  featureSize: 23 // 11 powers of 2, 4 rows, 4 corners to check if highest value there, 4 actions
 };
 
 Learner.prototype.serializeState = function () {
@@ -99,8 +99,8 @@ Learner.prototype.save = function() {
 Learner.prototype.move = function (where) {
   Learner.__super__.move.apply(this, arguments);
 
-  // TODO after-move logic in here
 
+/*   // TODO after-move logic in here
   // stopping is for pussies;
   if (this.won) {
     // not tested yet
@@ -113,22 +113,81 @@ Learner.prototype.move = function (where) {
   } else {
     this.think();
   }
+  */
 };
 
 Learner.prototype.think = function () {
   //this function does one episode of the learning process
   if (!this.running) return;
-
   var self = this;
-  //null vector
-  var e = math.zeroes(this.parameters.featureSize);
-  var initialAction = _.random(0, 3);
-  var state = null;
+  // TODO make the function underneath neat (abstractions or something)
+  var qlearning = function () {
+    //null vector
+    var e = math.zeroes(Learner.parameters.featureSize);
+    var action = math.pickRandom(Learner.moves);
+    // TODO get the game grid, which function or attribute???
+    var state = null; // the game grid
+    var presentFeatures = this.presentFeatures(state,action);
+
+    var feature;
+    while(!(this.won || this.over)){
+      for(feature in presentFeatures){
+        e[feature]+=1;
+      }
+
+      this.move(action);
+      //TODO fetch reward
+      var reward = 0;
+      //TODO fetch new state
+      state = state;
+
+      var sum = 0;
+      for(feature in presentFeatures){
+        sum+=this.state.parameterVector[feature];
+      }
+
+      var delta = reward - sum;
+      var Qs = math.matrix(Learner.moves.size());
+      for(action in Learner.moves){
+        var features = this.presentFeatures(state, action);
+        var Q = 0;
+        for(feature in features){
+          Q+=this.state.parameterVector[feature];
+        }
+        Qs[action] = Q;
+      }
+
+      delta +=  Learner.parameters.gamma * math.max(Qs);
+      this.state.parameterVector = math.add(this.state.parameterVector, math.multiply(Learner.parameters.alpha*delta,e));
+
+      var prob = Math.random();
+      if(prob < Learner.parameters.epsilon){
+        // random action
+        action = math.pickRandom(Learner.moves);
+        e = math.zeroes(Learner.parameters.featureSize);
+      }
+      else{
+        var Qs = math.matrix(Learner.moves.size());
+        for(action in Learner.moves){
+          var features = this.presentFeatures(state, action);
+          var Q = 0;
+          for(feature in features){
+            Q+=this.state.parameterVector[feature];
+          }
+          Qs[action] = Q;
+        }
+        action = _.argmax(Qs);
+      }
+
+    }
+  };
 
   var thinkRandom = function() {
     self.move(_.random(0, 3));
   };
 
+
+  //TODO plug qlearning function in over here when it's finished (I think)
   if (this.visual) _.delay(thinkRandom, this.visualDelay);
   // Have to do async defers (delay 1ms) because of exceeded callstack...
   // this will seriously delay the AI
@@ -136,7 +195,8 @@ Learner.prototype.think = function () {
 };
 
 Learner.prototype.beginState = function() {
-  return {placeholder: "This is where the state should come"}
+  return {placeholder: "This is where the state should come",
+  parameterVector: math.zeros(Learner.parameters.featureSize)}
 };
 
 /**
@@ -213,4 +273,14 @@ Learner.prototype.actuate = function () {
   if (this.visual || this.over) {
     Learner.__super__.actuate.apply(this, arguments);
   }
+};
+
+Learner.prototype.presentFeatures =  function (state, action) {
+  //TODO finish this!
+  // returns an array of featurenumbers present in the current state-action pair
+  // Currently 23 features are defined: 11 feat. representing the presence of a particular power of 2,
+  // 4 feat. representing the presence of numbers in a specific row/column,
+  // 4 feat. representing the corners
+  // 4 representing the actions
+  return [];
 };
