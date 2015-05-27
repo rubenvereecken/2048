@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "homepage": "https://github.com/rubenvereecken/2048",
   "authors": [
-    "Ruben Vereecken <rubenvereecken@gmail.com>"
+    "Ruben Vereecken <rubenvereecken@gmail.com>",
+    "Youri Coppens <youricoppens@gmail.com>"
   ],
   "keywords": [
     "2048",

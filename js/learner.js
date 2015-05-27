@@ -51,6 +51,14 @@ Learner.moves = {
   left: 3
 };
 
+Learner.parameters = {
+  alpha: 0.1,
+  gamma: 0.9,
+  lambda: 0.1,
+  epsilon: 0.1,
+  featureSize: 15
+};
+
 Learner.prototype.serializeState = function () {
   // TODO this is where we can serialize learner state like function params
   return this.state;
@@ -108,9 +116,15 @@ Learner.prototype.move = function (where) {
 };
 
 Learner.prototype.think = function () {
+  //this function does one episode of the learning process
   if (!this.running) return;
 
   var self = this;
+  //null vector
+  var e = math.zeroes(this.parameters.featureSize);
+  var initialAction = _.random(0, 3);
+  var state = null;
+
   var thinkRandom = function() {
     self.move(_.random(0, 3));
   };
@@ -122,7 +136,7 @@ Learner.prototype.think = function () {
 };
 
 Learner.prototype.beginState = function() {
-  return {placeholder: "This is where the state should come"};
+  return {placeholder: "This is where the state should come"}
 };
 
 /**
