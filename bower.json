@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "lodash": "~3.9.0",
-    "zepto": "~1.1.6"
+    "zepto": "~1.1.6",
+    "mathjs": "~1.6.0"
   }
 }
