@@ -18,6 +18,7 @@ Learner = (function(__super) {
    * @constructor
    */
   function Learner() {
+
     this.running = false;
     this.visualDelay = 5;
 
@@ -44,12 +45,12 @@ Learner = (function(__super) {
   return Learner;
 })(GameManager);
 
-Learner.moves = {
-  up: 0,
-  right: 1,
-  down: 2,
-  left: 3
-};
+Learner.moves = [
+  0, // up
+  1, // down
+  2, // right
+  3 //left
+];
 
 Learner.parameters = {
   alpha: 0.1,
@@ -88,7 +89,8 @@ Learner.prototype.serialize = function() {
   var s = Learner.__super__.serialize.apply(this, arguments);
   // TODO
   // if any inner state has to be saved do it here
-  return _.extend(s, this.serializeState());
+  var p = this.state.parameterVector.serialize();
+  return _.extend(s, p, this.serializeState());
 };
 
 Learner.prototype.save = function() {
@@ -102,18 +104,18 @@ Learner.prototype.move = function (where) {
 
 /*   // TODO after-move logic in here
   // stopping is for pussies;
-  if (this.won) {
-    // not tested yet
-    this.keepPlaying();
-  }
 
-  if (this.over) {
-    // Custom logic if it's over? Maybe AI needs it
-    this.restart();
-  } else {
-    this.think();
-  }
   */
+};
+
+Learner.prototype.presentFeatures =  function (state, action) {
+  //TODO finish this!
+  // returns an array of featurenumbers present in the current state-action pair
+  // Currently 23 features are defined: 11 feat. representing the presence of a particular power of 2,
+  // 4 feat. representing the presence of numbers in a specific row/column,
+  // 4 feat. representing the corners
+  // 4 representing the actions
+  return [];
 };
 
 Learner.prototype.think = function () {
@@ -123,23 +125,23 @@ Learner.prototype.think = function () {
   // TODO make the function underneath neat (abstractions or something)
   var qlearning = function () {
     //null vector
-    var e = math.zeroes(Learner.parameters.featureSize);
+    console.info("Start New episode");
+    var e = math.zeros(Learner.parameters.featureSize);
     var action = math.pickRandom(Learner.moves);
-    // TODO get the game grid, which function or attribute???
-    var state = null; // the game grid
-    var presentFeatures = this.presentFeatures(state,action);
+    var state = this.grid; // the game grid
+    var presentFeatures = self.presentFeatures(state, action);
 
     var feature;
     while(!(this.won || this.over)){
+      console.debug("New step");
       for(feature in presentFeatures){
         e[feature]+=1;
       }
 
-      this.move(action);
+      self.move(action);
       //TODO fetch reward
-      var reward = 0;
-      //TODO fetch new state
-      state = state;
+      var reward = 1;
+      state = this.grid;
 
       var sum = 0;
       for(feature in presentFeatures){
@@ -147,9 +149,9 @@ Learner.prototype.think = function () {
       }
 
       var delta = reward - sum;
-      var Qs = math.matrix(Learner.moves.size());
+      var Qs = math.zeros(Learner.moves.length);
       for(action in Learner.moves){
-        var features = this.presentFeatures(state, action);
+        var features = self.presentFeatures(state, action);
         var Q = 0;
         for(feature in features){
           Q+=this.state.parameterVector[feature];
@@ -158,40 +160,50 @@ Learner.prototype.think = function () {
       }
 
       delta +=  Learner.parameters.gamma * math.max(Qs);
-      this.state.parameterVector = math.add(this.state.parameterVector, math.multiply(Learner.parameters.alpha*delta,e));
+      self.state.parameterVector = math.add(self.state.parameterVector, math.multiply(Learner.parameters.alpha*delta,e));
 
       var prob = Math.random();
       if(prob < Learner.parameters.epsilon){
         // random action
         action = math.pickRandom(Learner.moves);
-        e = math.zeroes(Learner.parameters.featureSize);
+        e = math.zeros(Learner.parameters.featureSize);
       }
       else{
-        var Qs = math.matrix(Learner.moves.size());
+        var Qs = math.zeros(Learner.moves.length);
         for(action in Learner.moves){
-          var features = this.presentFeatures(state, action);
+          var features = self.presentFeatures(state, action);
           var Q = 0;
           for(feature in features){
             Q+=this.state.parameterVector[feature];
           }
           Qs[action] = Q;
         }
-        action = _.argmax(Qs);
+        action = argmax(Qs);
       }
 
     }
+    this.restart();
   };
 
   var thinkRandom = function() {
     self.move(_.random(0, 3));
+    if (this.won) {
+      // not tested yet
+      this.keepPlaying();
+    }
+
+    if (this.over) {
+      // Custom logic if it's over? Maybe AI needs it
+      this.restart();
+    } else {
+      this.think();
+    }
   };
 
-
-  //TODO plug qlearning function in over here when it's finished (I think)
-  if (this.visual) _.delay(thinkRandom, this.visualDelay);
+  if (this.visual) _.delay(qlearning, this.visualDelay);
   // Have to do async defers (delay 1ms) because of exceeded callstack...
   // this will seriously delay the AI
-  else _.defer(thinkRandom);
+  else _.defer(qlearning);
 };
 
 Learner.prototype.beginState = function() {
@@ -207,12 +219,12 @@ Learner.prototype.reset = function() {
   this.storageManager.setBestScore(0);
   this.loadState(this.beginState());
   this.showState();
-}
+};
 
 Learner.prototype.setup = function() {
   Learner.__super__.setup.apply(this, arguments);
   this.showState();
-}
+};
 
 /**
  * Called to start the learner
@@ -236,7 +248,7 @@ Learner.prototype.stop = function () {
   this.storageManager.setBestScore(0);
   this.showState();
   this.save();  // save AI state
-}
+};
 
 /**
  * Called to restart a single game run
@@ -275,12 +287,3 @@ Learner.prototype.actuate = function () {
   }
 };
 
-Learner.prototype.presentFeatures =  function (state, action) {
-  //TODO finish this!
-  // returns an array of featurenumbers present in the current state-action pair
-  // Currently 23 features are defined: 11 feat. representing the presence of a particular power of 2,
-  // 4 feat. representing the presence of numbers in a specific row/column,
-  // 4 feat. representing the corners
-  // 4 representing the actions
-  return [];
-};
