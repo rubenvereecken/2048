@@ -1,5 +1,20 @@
 \begin{thebibliography}{1}
 
+\bibitem{appstores}
+Ariel.
+\newblock App stores growth accelerates in 2014.
+\newblock Webpage, January 2015.
+
+\bibitem{2048}
+digiplex.in.
+\newblock 2048.
+\newblock Digital, December 2014.
+
+\bibitem{howard1960mdp}
+Ronald~A. Howard.
+\newblock {\em {Dynamic Programming and Markov Processes}}.
+\newblock MIT\~{}Press, Cambridge, Massachusetts, 1960.
+
 \bibitem{sutton1998rl}
 Richard~S. Sutton and Andrew~G. Barto.
 \newblock {\em Introduction to Reinforcement Learning}.
