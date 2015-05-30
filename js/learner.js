@@ -30,6 +30,7 @@ Learner = (function(__super) {
     $('#learner-rounds').val(this.originalRounds);
 
     this.state = this.storageManager.get('learner-state') || this.beginState();
+    this.history = {};
 
     this.inputManager.on("startLearner", this.start.bind(this));
     this.inputManager.on("stopLearner", this.stop.bind(this));
@@ -42,6 +43,7 @@ Learner = (function(__super) {
     this.asyncThink = this.asyncThink.bind(this);
 
     this.showState();
+    window.AI = this;
   }
 
   return Learner;
@@ -201,7 +203,7 @@ Learner.prototype.think = function () {
  * That can happen through `prepare`.
  */
 Learner.prototype.resetState = function() {
-
+  this.state = {};
 };
 
 /**
