@@ -49,8 +49,19 @@ NeuralNetLearner.prototype.reward = function() {
   return score / NeuralNetLearner.MAX_REWARD;
 };
 
+Learner.prototype.resetState = function() {
+  this.network = undefined;
+  this.state = {
+    previousScore: 0,
+    totalReward: 0,
+    highestTile: 0
+  };
+};
+
 NeuralNetLearner.prototype.prepare = function() {
-  this.network = new synaptic.Architect.Perceptron(20, 25, 1);
+  // Just keep using the old network for the new rounds
+  if (!this.network)
+    this.network = new synaptic.Architect.Perceptron(20, 25, 1);
   this.state = {
     previousScore: this.score,
     totalReward: 0,
@@ -142,4 +153,12 @@ NeuralNetLearner.prototype.serializeState = function () {
     serialized.network = this.network.toJSON();
   }
   return serialized;
+};
+
+NeuralNetLearner.prototype.deserializeState = function (state) {
+  this.state = state;
+  if (state.network) {
+    this.network = Network.fromJSON(state.network);
+    delete this.state.network;
+  }
 };

@@ -29,7 +29,9 @@ Learner = (function(__super) {
     this.roundsLeft = this.originalRounds;
     $('#learner-rounds').val(this.originalRounds);
 
-    this.state = this.storageManager.get('learner-state') || this.beginState();
+    var storedState = this.storageManager.get('learner-state');
+    if (storedState)
+      this.deserializeState(storedState);
     this.history = {};
 
     this.inputManager.on("startLearner", this.start.bind(this));
@@ -65,8 +67,12 @@ Learner.prototype.serializeState = function () {
   return this.state;
 };
 
-Learner.prototype.loadState = function (state) {
+Learner.prototype.deserializeState = function(state) {
   this.state = state;
+};
+
+Learner.prototype.loadState = function (state) {
+  this.deserializeState(state);
   this.showState();
   console.debug("Successfully loaded state");
 };
@@ -86,13 +92,16 @@ Learner.prototype.showState = function() {
 };
 
 Learner.prototype.serialize = function() {
-  var s = Learner.__super__.serialize.apply(this, arguments);
+  // TODO remove this
+  // I kind of stopped caring about game state sometime ago
+  //var s = Learner.__super__.serialize.apply(this, arguments);
   // if any inner state has to be saved do it here
+  var s = {};
   return _.extend(s, this.serializeState());
 };
 
 Learner.prototype.save = function() {
-  this.storageManager.set("learner-state", this.state);
+  this.storageManager.set("learner-state", this.serialize());
   console.info("Successfully saved AI state");
 };
 
