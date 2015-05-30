@@ -47,8 +47,8 @@ Learner = (function(__super) {
   return Learner;
 })(GameManager);
 
-function NotImplementedException(name) {
-  this.message = name + " not implemented";
+function NotImplementedException() {
+  this.message = "Method not implemented";
 }
 
 Learner.moves = {
@@ -185,14 +185,14 @@ Learner.prototype.play = function() {
  * State should be initialized in `this.state`
  */
 Learner.prototype.prepare = function () {
-  //throw new NotImplementedException('prepare');
+  throw new NotImplementedException();
 };
 
 /**
  * Called every round. Should access state through `this.state`
  */
 Learner.prototype.think = function () {
-  this.move(_.random(0, 3))
+  throw new NotImplementedException();
 };
 
 /**
