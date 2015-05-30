@@ -44,6 +44,10 @@ Learner = (function(__super) {
   return Learner;
 })(GameManager);
 
+function NotImplementedException(name) {
+  this.message = name + " not implemented";
+}
+
 Learner.moves = {
   up: 0,
   right: 1,
@@ -52,7 +56,7 @@ Learner.moves = {
 };
 
 Learner.prototype.serializeState = function () {
-  // TODO this is where we can serialize learner state like function params
+  // this is where we can serialize learner state like function params
   return this.state;
 };
 
@@ -78,7 +82,6 @@ Learner.prototype.showState = function() {
 
 Learner.prototype.serialize = function() {
   var s = Learner.__super__.serialize.apply(this, arguments);
-  // TODO
   // if any inner state has to be saved do it here
   return _.extend(s, this.serializeState());
 };
@@ -88,41 +91,12 @@ Learner.prototype.save = function() {
   console.info("Successfully saved AI state");
 };
 
+/**
+ * Usually `think` will call move
+ * @param where
+ */
 Learner.prototype.move = function (where) {
   Learner.__super__.move.apply(this, arguments);
-
-  // TODO after-move logic in here
-
-  // stopping is for pussies;
-  if (this.won) {
-    // not tested yet
-    this.keepPlaying();
-  }
-
-  if (this.over) {
-    // Custom logic if it's over? Maybe AI needs it
-    this.restart();
-  } else {
-    this.think();
-  }
-};
-
-Learner.prototype.think = function () {
-  if (!this.running) return;
-
-  var self = this;
-  var thinkRandom = function() {
-    self.move(_.random(0, 3));
-  };
-
-  if (this.visual) _.delay(thinkRandom, this.visualDelay);
-  // Have to do async defers (delay 1ms) because of exceeded callstack...
-  // this will seriously delay the AI
-  else _.defer(thinkRandom);
-};
-
-Learner.prototype.beginState = function() {
-  return {placeholder: "This is where the state should come"};
 };
 
 /**
@@ -131,14 +105,14 @@ Learner.prototype.beginState = function() {
 Learner.prototype.reset = function() {
   console.debug("AI reset");
   this.storageManager.setBestScore(0);
-  this.loadState(this.beginState());
+  this.resetState();
   this.showState();
-}
+};
 
 Learner.prototype.setup = function() {
   Learner.__super__.setup.apply(this, arguments);
   this.showState();
-}
+};
 
 /**
  * Called to start the learner
@@ -179,7 +153,55 @@ Learner.prototype.restart = function (event) {
     console.info("Round " + (this.originalRounds - this.roundsLeft) + "/" + this.originalRounds);
   }
   Learner.__super__.restart.apply(this, arguments);
+  this.prepare();
+  this.play();
+};
+
+Learner.prototype.asyncThink = function() {
   this.think();
+  this.play();
+};
+
+Learner.prototype.play = function() {
+  if (this.over || this.won) {
+    return this.restart();
+  }
+
+  // wtf
+  var think = this.asyncThink.bind(this);
+
+  if (this.visual) _.delay(think, this.visualDelay);
+  // Have to do async defers (delay 1ms) because of exceeded callstack...
+  // this will seriously delay the AI
+  else _.defer(think);
+};
+
+///
+/// Below are methods that should be overridden
+///
+
+/**
+ * Prepare the learner for a new series of games.
+ * State should be initialized in `this.state`
+ */
+Learner.prototype.prepare = function () {
+  throw new NotImplementedException('prepare');
+};
+
+/**
+ * Called every round. Should access state through `this.state`
+ */
+Learner.prototype.think = function () {
+  this.move(_.random(0, 3))
+};
+
+/**
+ * Maybe not very important.
+ * Initialize the learner state to something neutral. Does not have to be prepped yet.
+ * That can happen through `prepare`.
+ */
+Learner.prototype.resetState = function() {
+
 };
 
 /**
