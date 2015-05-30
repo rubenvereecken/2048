@@ -115,3 +115,11 @@ Grid.prototype.serialize = function () {
     cells: cellState
   };
 };
+
+Grid.prototype.flatten = function() {
+  return [].concat.apply([], this.cells);
+};
+
+Grid.prototype.highestTile = function() {
+  return _.max(this.flatten(), "value");
+};
