@@ -38,6 +38,9 @@ Learner = (function(__super) {
     this.inputManager.on("loadState", this.loadState.bind(this));
     this.inputManager.on("toggleVisual", this.toggleVisual.bind(this));
 
+    // asyncThink's `this` will now always point to the `this` object
+    this.asyncThink = this.asyncThink.bind(this);
+
     this.showState();
   }
 
@@ -157,6 +160,7 @@ Learner.prototype.restart = function (event) {
   this.play();
 };
 
+
 Learner.prototype.asyncThink = function() {
   this.think();
   this.play();
@@ -167,13 +171,9 @@ Learner.prototype.play = function() {
     return this.restart();
   }
 
-  // wtf
-  var think = this.asyncThink.bind(this);
-
-  if (this.visual) _.delay(think, this.visualDelay);
-  // Have to do async defers (delay 1ms) because of exceeded callstack...
-  // this will seriously delay the AI
-  else _.defer(think);
+  if (this.visual) _.delay(this.asyncThink, this.visualDelay);
+  // These defers will slow down the AI but they're worth it to simplify things
+  else _.defer(this.asyncThink);
 };
 
 ///
@@ -185,7 +185,7 @@ Learner.prototype.play = function() {
  * State should be initialized in `this.state`
  */
 Learner.prototype.prepare = function () {
-  throw new NotImplementedException('prepare');
+  //throw new NotImplementedException('prepare');
 };
 
 /**
