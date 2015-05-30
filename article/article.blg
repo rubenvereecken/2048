@@ -1,3 +1,10 @@
 This is BibTeX, Version 0.99dThe top-level auxiliary file: article.aux
 The style file: plain.bst
 Database file #1: article.bib
+Warning--entry type for "underflow" isn't style-file defined
+--line 36 of file article.bib
+Warning--entry type for "ov3y" isn't style-file defined
+--line 43 of file article.bib
+Warning--entry type for "nneo" isn't style-file defined
+--line 50 of file article.bib
+(There were 3 warnings)

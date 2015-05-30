@@ -15,9 +15,21 @@ Ronald~A. Howard.
 \newblock {\em {Dynamic Programming and Markov Processes}}.
 \newblock MIT\~{}Press, Cambridge, Massachusetts, 1960.
 
+\bibitem{nneo}
+nneonneo.
+\newblock 2048-ai, 2015.
+
+\bibitem{ov3y}
+ov3y.
+\newblock {2048-AI}, 2015.
+
 \bibitem{sutton1998rl}
 Richard~S. Sutton and Andrew~G. Barto.
 \newblock {\em Introduction to Reinforcement Learning}.
 \newblock MIT Press, Cambridge, MA, USA, 1st edition, 1998.
+
+\bibitem{underflow}
+Underflow.
+\newblock reinforcement-2048, 2014.
 
 \end{thebibliography}

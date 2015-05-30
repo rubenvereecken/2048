@@ -6,6 +6,7 @@
 \usepackage{float}
 \usepackage{fullpage}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage{listings}
 \usepackage{url}
 
@@ -20,22 +21,25 @@ Vrije Universiteit Brussel, Pleinlaan 2, 1050 Brussels, Belgium \\
 \maketitle
 
 \begin{abstract}
-In $2048$ it is the task of the player to slide numbers on the board so that the same numbers would merge, and multiply. The higher these numbers get, the higher the score of the player will be. This paper showed a new algorithm based on reinforcement learning techniques to solve the puzzle game $2048$.
+In $2048$ it is the task of the player to slide numbers on the board so that the same numbers would merge, and multiply. The higher these numbers get, the higher the score of the player will be. This paper showed an algorithm based on reinforcement learning techniques to solve the puzzle game $2048$.
 Due to the large state space, a function approximation technique needs to be applied.
-After investigating Tile Coding as linear approximation, the decision was made to use Artificial Neural Networks instead as non-linear alternative for linear approximations.
+After investigating Tile Coding, which enables approximating linear functions, the decision was made to use Artificial Neural Networks instead as non-linear alternative for linear approximations.
 Our agent successfully learned how to play the game, and improve its decision making in different state to gain a higher score.
 \end{abstract}
 
 \section{Introduction}
-Since the explosive growth of smartphone usage in our everyday lives, and the improvement of SDK's for smartphone development, we have seen a rapid evolution from software developers to mobile developers. This led to a huge increase of applications for smartphones, with over 1.43 million applications in the Google Play store, and 1.21 million in the Apple App store as of December 2014 \cite{appstores}. One of the more popular applications of 2014, was the puzzle game "2048" \cite{2048}, where the objective of the player is to increase its score by sliding the board (4x4 grid) such that the same numbers that are next to each other merge, and multiply. These numbers are all powers of 2, and the higher the number gets, the higher your score will be. Figure~\ref{fig:2048} shows what the game looks like after the player has performed a couple of moves. We created an artificial intelligence (AI) that plays the game, and aims to gather a score as high as possible. Using reinforcement learning (RL) \cite{sutton1998rl} we train our agent to learn how to play the game, and how to differentiate between good, and bad actions. 
+Since the explosive growth of smartphone usage in our everyday lives, and the improvement of SDK's for smartphone development, we have seen a rapid evolution from software developers to mobile developers. This led to a huge increase of applications for smartphones, with over 1.43 million applications in the Google Play store, and 1.21 million in the Apple App store as of December 2014 \cite{appstores}. One of the more popular applications of 2014, was the puzzle game "2048" \cite{2048}, where the objective of the player is to increase its score by sliding the board (4x4 grid) such that the same numbers that are next to each other merge, and multiply. These numbers are all powers of 2, and the higher the number gets, the higher your score will be. Figure~\ref{fig:2048} shows what the game looks like after the player has performed a couple of moves.
+The popularity of the puzzle game made programmers eager to solve this game using Artificial Intelligence (AI).\cite{underflow,ov3y,nneo}
+
+We created an AI that plays the game, and aims to gather a score as high as possible. Using reinforcement learning (RL) \cite{sutton1998rl} we train our agent to learn how to play the game, and how to differentiate between good, and bad actions. 
 Since the game has a large state space, one cannot simply use the general implementation of Q-Learning \cite{sutton1998rl} since this algorithm uses a lookup table to store values for each state-action pair of the learning environment.
 Therefore the lookup table needs to be omitted and replaced by a function for which the parameters need to be approximated.
 This technique is called function approximation and is a standard known application in supervised learning.
-Several techniques are explained in \cite{sutton1998rl}, but deal with linear functions.
+Several techniques are explained in \cite{sutton1998rl}, dealing with approximating linear functions.
 One of these techniques is called Tile Coding \cite{sutton1998rl}, where the idea is to represent state as a feature vector for the learning agent.
 The agent will try to learn the function which produces the correct state-action values used by the Q-learning algorithm.
-Since it is unknown whether a linear function could represent the state-action values for the learning task of $2048$, research was done to link non-linear function approximation with RL.
-At the end a neural network was used to implement a reinforcement learning agent for the 2048 game.
+Since it is unknown whether a linear function could represent the state-action values for the learning task of $2048$, we chose to implement non-linear function approximation with RL.
+A neural network was chosen for our reinforcement learning agent for the 2048 game, since success stories exist. \cite{}
  We start the paper by giving background information about the explored and used techniques, and their functionalities. Afterwards we will explain in-depth how these methods are integrated in our algorithm, and how they help our AI to learn how to play $2048$. We show the results we managed to achieve, and examine them in detail. The paper ends by discussing future possibilities to achieve better results.
 \begin{figure}[H]
 \centering
@@ -70,18 +74,30 @@ Using this algorithm, we learn an action-value function, from which we receive t
 \textbf{Learning rate} $\alpha$ has an influence on how much we $learn$ by performing an action. If $\alpha=0$ we would not learn anything, while for $\alpha=1$ the new information would practically overwrite the old one. We have to find a tradeoff between learning nothing, and only remember the last information received.
 
 \subsubsection{Generalization and Function Approximation}
-Previously we made the assumption that it was possible to save the $Q-values$ for each state-action pair, but this is not possible when our state-, or action space becomes large or continuous. Therefore we try to generalize states that are similar, and use function approximation to find the optimal policy. A well-known technique is Tile Coding \cite{sutton1998rl}, where use multiple grids of tiles as a layer over our state space. Each grid, also called $tiling$, represents a feature vector, and each tile thus symbolizes a binary feature. The bigger a tile is, the more we generalize. We give weights to each tiling, and can simply use the weighted sum approach to calculate the approximate value function. This set of weights has to be tuned to find the best approximation. Figure~\ref{fig:figtmp54} shows a graphical representation of such a grid tiles over a state space.
-
+Previously we made the assumption that it was possible to save the $Q-values$ for each state-action pair, but this is not possible when our state-, or action space becomes large or continuous. Therefore we try to generalize states that are similar, and use function approximation to find the optimal policy. 
 
 \subsubsection{Tile Coding}
+A well-known technique is Tile Coding \cite{sutton1998rl}, where use multiple grids of tiles as a layer over our state space. Each grid, also called $tiling$, represents a feature vector, and each tile thus symbolizes a binary feature. The bigger a tile is, the more we generalize. We give weights to each tiling, and can simply use the weighted sum approach to calculate the approximate value function. This set of weights has to be tuned to find the best approximation. Figure~\ref{fig:figtmp54} shows a graphical representation of such a grid tiles over a state space.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{img/figtmp54}
-\caption{Representation of gridtilings, taken from \cite{sutton1998rl}}
+\caption{Representation of grid tilings, taken from \cite{sutton1998rl}}
 \label{fig:figtmp54}
 \end{figure}
+
 \subsection{Artificial Neural Networks}
-\subsection{Using ANN for RL}
+A well known family of modeling techniques is are the Artificial Neural Networks (ANN).
+They are inspired by biological neural networks as can be found within the human brain.
+An ANN consists of distributed, interconnected nodes, called `neurons'.
+Each neuron performs parallel a logistic function with the input it receives (from other neurons or input data) and produces the output of this function which will be sent to other neurons within the network or serves as the output of the network.
+Many different architectures exist. 
+
+
+\subsubsection{Using ANN for RL}
+Euhm ja neurale netwerken kunnen gebruikt worden om aan functie approximatie te doen.
+Men kent het vooral in een toepassing supervised learning, maar een neuraal netwerk kan eveneens gebruikt worden binnenin RL.
+Een neuraal netwerk kan gebruikt worden om 
+
 \section{Methods}
 In detail de methodes bespreken die we gebruiken, de functionaliteiten, eigenschappen en zo
 
