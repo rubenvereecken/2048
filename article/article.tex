@@ -86,18 +86,10 @@ A well-known technique is Tile Coding \cite{sutton1998rl}, where use multiple gr
 \end{figure}
 
 \subsection{Artificial Neural Networks}
-A well known family of modeling techniques is are the Artificial Neural Networks (ANN).
-They are inspired by biological neural networks as can be found within the human brain.
-An ANN consists of distributed, interconnected nodes, called `neurons'.
-Each neuron performs parallel a logistic function with the input it receives (from other neurons or input data) and produces the output of this function which will be sent to other neurons within the network or serves as the output of the network.
-Many different architectures exist. 
-
+A well known family of modeling techniques is are the Artificial Neural Networks (ANN). They are inspired by biological neural networks as can be found within the human brain. An ANN consists of distributed, interconnected nodes, called `neurons'. Each neuron performs parallel a logistic function with the input it receives (from other neurons or input data) and produces the output of this function which will be sent to other neurons within the network or serves as the output of the network. Many different architectures exist. 
 
 \subsubsection{Using ANN for RL}
-Euhm ja neurale netwerken kunnen gebruikt worden om aan functie approximatie te doen.
-Men kent het vooral in een toepassing supervised learning, maar een neuraal netwerk kan eveneens gebruikt worden binnenin RL.
-Een neuraal netwerk kan gebruikt worden om 
-
+In most cases ANN is used for supervised learning, where we are given a dataset consisting of an input $x$, and an outcome $y$, where we try to learn the function $f:X \mapsto Y$. This is different for RL problems, here we perform an action $a$, within a state $s$, and are returned a reward $r$. We can translate this to the supervised learning example, our state-action pair $(s,a)$ is our input $x$, and the returned reward $r$, is our outcome $y$. Since our problem consists of a continuous space, and we have to use function approximation to find the optimal policy, it is clear that we can use ANN for this. It has been shown that ANN can be used with RL \cite{dominic1991ann,hoskins1992ann} multiple times, and more recently also on problems with a continuous space \cite{wang2005ann}.
 \section{Methods}
 In detail de methodes bespreken die we gebruiken, de functionaliteiten, eigenschappen en zo
 
@@ -109,7 +101,9 @@ Resultaten tonen, en bespreken
 \section{Discussion and Future work}
 Praten over het nut van dit, wat het opgeleverd heeft, en hoe we het kunnen verbeteren in de toekomst
 \section{Acknowledgement}
-
+This paper was realized for the Current Trends in Artificial Intelligence course between the VUB, and ULB.
+We would like to thank Professor Hugues Bersini, and Assistant Johan Loeckx for the interesting presentations they arranged for this course, and all the information it taught us.
+\nocite{*}
 \bibliographystyle{plain}
 \bibliography{article}
 \end{document}
