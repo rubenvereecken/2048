@@ -20,14 +20,17 @@ NeuralNetLearner = (function(__super) {
   function NeuralNetLearner() {
     NeuralNetLearner.__super__.constructor.apply(this, arguments);
 
+
     this.epsilon = 0.1;
     this.gamma = 0.95;
+    this.hiddenLayerSize = 15;
 
     // these two influence each other...
-    this.learnRate = 0.9;
-    this.networkRate = 0.25;
+    this.learnRate = 0.5;
+    this.networkRate = 0.3;
 
     this.visualDelay = 500;
+    this.visualizeState = false;
   }
 
   return NeuralNetLearner;
@@ -82,29 +85,37 @@ Learner.prototype.resetState = function() {
     previousScore: 0,
     totalReward: 0,
     highestTile: 0,
-    moves: 0
+    moves: 0,
+    gamesPlayed: 0
   };
 };
 
 NeuralNetLearner.prototype.prepare = function() {
   // Just keep using the old network for the new rounds
   if (!this.network) {
-    this.network = new synaptic.Architect.Perceptron(NeuralNetLearner.networkInputSize, 25, 1);
+    this.network = new synaptic.Architect.Perceptron(NeuralNetLearner.networkInputSize, this.hiddenLayerSize, 1);
 /*    this.network.neurons().forEach(function (neuron) {
       neuron.neuron.squash = Neuron.squash.IDENTITY;
     });*/
     // fuck you neural net
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 100000; i++) {
       this.activate(this.input(_.random(0, 3)));
       this.network.propagate(1, [0]);
     }
   }
-  this.state = {
+
+  // long term state, over multiple sessions (keep values)
+  _.defaults(this.state, {
+    gamesPlayed: 0
+  });
+
+  // state for a single session, overwrite previous values
+  _.extend(this.state, {
     previousScore: this.score,
     totalReward: 0,
     highestTile: 0,
     moves: 0
-  };
+  });
 };
 
 var inputGrid = function(move) {
@@ -143,10 +154,9 @@ var inputTilings = function(move) {
 };
 
 NeuralNetLearner.prototype.input = inputGrid;
-NeuralNetLearner.networkInputSize = 20;
+NeuralNetLearner.networkInputSize = 20; // 20 or 164
 
 NeuralNetLearner.prototype.activate = function(input) {
-
   return this.network.activate(input)[0] * NeuralNetLearner.MAX_REWARD;
 };
 
@@ -207,7 +217,8 @@ NeuralNetLearner.prototype.think = function () {
   var oldQ = this.activate(chosen);
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
   this.propagate(newQ);
-  //console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosen));
+  if (this.debug)
+    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosen));
 
   // finish up
   this.state.previousScore = this.score;
@@ -215,6 +226,10 @@ NeuralNetLearner.prototype.think = function () {
   this.state.moves += 1;
   this.state.totalReward += reward;
 
+};
+
+NeuralNetLearner.prototype.toggleDebug = function () {
+  this.debug = !this.debug;
 };
 
 NeuralNetLearner.prototype.serializeState = function () {
@@ -248,11 +263,12 @@ NeuralNetLearner.prototype.whenGameFinishes = function () {
     highestTile: this.grid.highestTile().value,
     moves: this.state.moves
   }
+  this.state.gamesPlayed += 1;
 };
 
 Learner.prototype.showState = function() {
-  // sssshh
-  //this.actuator.showState(this.serializeState());
+  if (this.visualizeState)
+    this.actuator.showState(this.serializeState());
 };
 
 
@@ -302,3 +318,4 @@ NeuralNetLearner.prototype.availableMoves = function () {
 
   return availableMoves;
 };
+
