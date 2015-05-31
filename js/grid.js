@@ -123,3 +123,22 @@ Grid.prototype.flatten = function() {
 Grid.prototype.highestTile = function() {
   return _.max(this.flatten(), "value");
 };
+
+Grid.prototype.equals = function(other) {
+  var theirCells = other.cells;
+  var myCells = this.cells;
+  var myCell, theirCell;
+  for (var x = 0; x < this.size; x++) {
+    for (var y = 0; y < this.size; y++) {
+      myCell = myCells[x][y];
+      theirCell = theirCells[x][y];
+      if (!myCell && !theirCell)
+        continue;
+      if (!!myCell ^ !!theirCell)
+        return false;
+      if (myCell.value != theirCell.value)
+        return false;
+    }
+  }
+  return true;
+};

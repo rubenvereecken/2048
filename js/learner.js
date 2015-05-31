@@ -178,6 +178,8 @@ Learner.prototype.asyncThink = function() {
 };
 
 Learner.prototype.play = function() {
+  if (!this.running) return;
+
   if (this.over || this.won) {
     return this.restart();
   }
