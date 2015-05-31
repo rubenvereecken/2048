@@ -78,8 +78,13 @@ Learner.prototype.resetState = function() {
 
 NeuralNetLearner.prototype.prepare = function() {
   // Just keep using the old network for the new rounds
-  if (!this.network)
+  if (!this.network) {
+    console.info("Initializing network");
     this.network = new synaptic.Architect.Perceptron(20, 25, 1);
+    this.network.neurons().forEach(function (neuron) {
+      neuron.neuron.squash = Neuron.squash.IDENTITY;
+    });
+  }
   this.state = {
     previousScore: this.score,
     totalReward: 0,
@@ -96,7 +101,7 @@ NeuralNetLearner.prototype.input = function(move) {
   var tiles = this.grid.flatten();
   for (var i = 0; i < tiles.length; i++) {
     if (tiles[i])
-      tiles[i] = Math.log2(tiles[i].value)/11;
+      tiles[i] = tiles[i].value;
     else
       tiles[i] = 0;
   }
