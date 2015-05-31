@@ -1,0 +1,13 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Background Information}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Reinforcement Learning}{section.2}% 3
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Q-Learning}{subsection.2.1}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Generalization and Function Approximation}{subsection.2.1}% 5
+\BOOKMARK [3][-]{subsubsection.2.1.3}{Tile Coding}{subsection.2.1}% 6
+\BOOKMARK [2][-]{subsection.2.2}{Artificial Neural Networks}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Using ANN for RL}{subsection.2.2}% 8
+\BOOKMARK [1][-]{section.3}{Methods}{}% 9
+\BOOKMARK [1][-]{section.4}{Experimental setup}{}% 10
+\BOOKMARK [1][-]{section.5}{Results}{}% 11
+\BOOKMARK [1][-]{section.6}{Discussion and Future work}{}% 12
+\BOOKMARK [1][-]{section.7}{Acknowledgement}{}% 13

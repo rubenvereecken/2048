@@ -34,6 +34,7 @@ NeuralNetLearner = (function(__super) {
 
     this.visualDelay = 500;
     this.visualizeState = false;
+    this.keepHistory = true;
   }
 
   return NeuralNetLearner;
@@ -179,13 +180,16 @@ NeuralNetLearner.prototype.propagate = function(val) {
 };
 
 NeuralNetLearner.prototype.think = function () {
-  var reward;
-  var move;
-  var chosen;
+  var self = this;
+  var chosenMove, chosenStateAction;
   var Q, maxQ;
-  var moveCandidate, input;
+  var input;
 
+
+  // explore with epsilon chance
   var availableMoves = this.availableMoves();
+
+/*
   //softmax exploration
   var gibsFactors = [];
   for (var i = 0; i < availableMoves.length; i++) {
@@ -208,35 +212,46 @@ NeuralNetLearner.prototype.think = function () {
       break;
     }
   }
+*/
+  if (maybe(this.epsilon)) {
+    chosenMove = _.sample(availableMoves);
+    chosenStateAction = this.input(chosenMove);
+  } else {
+    maxQ = -Infinity;
+    availableMoves.forEach (function(moveCandidate) {
+      input = self.input(moveCandidate);
+      Q = self.activate(input);
+      if (Q > maxQ) {
+        chosenStateAction = input;
+        maxQ = Q;
+        chosenMove = moveCandidate
+      }
+    });
+  }
 
 
   console.log(move);
   // Do move and get reward
-  this.move(move);
-  reward = this.reward();
+  this.move(chosenMove);
+  var reward = this.reward();
 
   // Update
   // Find the highest new Q value Q(s', a')
-  maxQ = 0;
-  availableMoves = this.availableMoves();
-  for (var i = 0; i < availableMoves.length; i++) {
-    moveCandidate = availableMoves[i];
-    // this uses the new state we're currently in
-    input = this.input(moveCandidate);
-    Q = this.activate(input);
+  maxQ = -Infinity;
+  availableMoves.forEach (function(moveCandidate) {
+    input = self.input(moveCandidate);
+    Q = self.activate(input);
     if (Q > maxQ) {
-      chosen = input;
       maxQ = Q;
-      move = moveCandidate;
     }
-  }
+  });
 
   // do the move again so the neural net is prepared to backpropagate the value
-  var oldQ = this.activate(chosen);
+  var oldQ = this.activate(chosenStateAction);
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
   this.propagate(newQ);
   if (this.debug)
-    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosen));
+    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosenStateAction));
 
   // finish up
   this.state.previousScore = this.score;
@@ -275,13 +290,22 @@ NeuralNetLearner.prototype.stop = function () {
 
 NeuralNetLearner.prototype.whenGameFinishes = function () {
   NeuralNetLearner.__super__.whenGameFinishes.apply(this, arguments);
-  this.history[this.roundsPlayed] = {
-    score: this.score,
-    reward: this.state.totalReward,
-    highestTile: this.grid.highestTile().value,
-    moves: this.state.moves
-  }
   this.state.gamesPlayed += 1;
+
+  if (this.keepHistory) {
+    if (_.isEmpty(this.history)) {
+      this.history = {
+        score: [],
+        reward: [],
+        highest: [],
+        moves: []
+      }
+    }
+    this.history.score.push(this.score);
+    this.history.reward.push(this.state.totalReward);
+    this.history.highest.push(this.grid.highestTile().value);
+    this.history.moves.push(this.state.moves);
+  }
 };
 
 Learner.prototype.showState = function() {
