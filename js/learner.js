@@ -26,7 +26,7 @@ Learner = (function(__super) {
     $('#toggle-visual').prop('checked', this.visual);
 
     this.originalRounds = this.storageManager.get('rounds') || 1000;
-    this.roundsLeft = this.originalRounds;
+    this.roundsPlayed = 0;
     $('#learner-rounds').val(this.originalRounds);
 
     var storedState = this.storageManager.get('learner-state');
@@ -134,9 +134,10 @@ Learner.prototype.setup = function() {
  */
 Learner.prototype.start = function (rounds) {
   console.info("AI started (" + rounds + " rounds)" );
-  this.roundsLeft = rounds;
+  this.roundsPlayed = 0;
   this.originalRounds = rounds;
   this.storageManager.set('rounds', rounds);
+  this.storageManager.setBestScore(0);
   this.running = true;
   this.showState();
   // TODO maybe we don't want to restart? worth a thought
@@ -144,10 +145,8 @@ Learner.prototype.start = function (rounds) {
 };
 
 Learner.prototype.stop = function () {
-  console.debug("AI stopped");
+  console.info("Finished " + this.roundsPlayed + " rounds.");
   this.running = false;
-  this.roundsLeft = 0;
-  this.storageManager.setBestScore(0);
   this.showState();
   this.save();  // save AI state
 }
@@ -158,13 +157,10 @@ Learner.prototype.stop = function () {
  */
 
 Learner.prototype.restart = function (event) {
-  console.debug("restart");
-  if (this.roundsLeft <= 0) {
-    console.info("Finished " + this.originalRounds + " rounds.");
+  if (this.roundsPlayed >= this.originalRounds || !this.running) {
     return this.inputManager.stopLearner();
   } else {
-    this.roundsLeft -= 1;
-    console.info("Round " + (this.originalRounds - this.roundsLeft) + "/" + this.originalRounds);
+    console.info("Round " + (this.roundsPlayed+1) + "/" + this.originalRounds);
   }
   Learner.__super__.restart.apply(this, arguments);
   this.prepare();
@@ -181,6 +177,7 @@ Learner.prototype.play = function() {
   if (!this.running) return;
 
   if (this.over || this.won) {
+    this.whenGameFinishes();
     return this.restart();
   }
 
@@ -206,6 +203,10 @@ Learner.prototype.prepare = function () {
  */
 Learner.prototype.think = function () {
   throw new NotImplementedException();
+};
+
+Learner.prototype.whenGameFinishes = function () {
+  this.roundsPlayed += 1;
 };
 
 /**

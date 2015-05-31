@@ -103,11 +103,6 @@ NeuralNetLearner.prototype.input = function(move) {
   return [].concat(moveBits, tiles);
 };
 
-NeuralNetLearner.prototype.vectorFromMove = function(move) {
-  var moveBits = [0, 0, 0, 0];
-  moveBits[move] = 1;
-  return moveBits;
-};
 
 NeuralNetLearner.prototype.think = function () {
   var reward;
@@ -191,6 +186,10 @@ NeuralNetLearner.prototype.deserializeState = function (state) {
 
 NeuralNetLearner.prototype.stop = function () {
   NeuralNetLearner.__super__.stop.apply(this, arguments);
+};
+
+NeuralNetLearner.prototype.whenGameFinishes = function () {
+  NeuralNetLearner.__super__.whenGameFinishes.apply(this, arguments);
 };
 
 
