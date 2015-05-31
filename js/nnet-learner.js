@@ -21,8 +21,8 @@ NeuralNetLearner = (function(__super) {
     NeuralNetLearner.__super__.constructor.apply(this, arguments);
 
     this.epsilon = 0.1;
-    this.learnRate = 0.1;
-    this.gamma = 0.2;
+    this.learnRate = 0.45;
+    this.gamma = 0.95;
     this.networkRate = 0.1;
   }
 
@@ -35,7 +35,6 @@ var maybe = function(p) {
 
 NeuralNetLearner.MAX_REWARD = 2048;
 
-
 NeuralNetLearner.prototype.reward = function() {
   // Base reward is difference between current score and previous score
   // every merge thisis the value of the resulting tile
@@ -43,10 +42,13 @@ NeuralNetLearner.prototype.reward = function() {
   if (score > NeuralNetLearner.MAX_REWARD)
     console.debug("Exceeded max reward " + score);
   // Give an extra reward if a new highest tile has been reached, proportional to its value
-/*  var currentHighest = this.grid.highestTile().value;
+  var currentHighest = this.grid.highestTile().value;
   if (currentHighest > this.state.highestTile)
     score += this.state.highestTile;*/
-  return score / NeuralNetLearner.MAX_REWARD;
+
+  score /= NeuralNetLearner.MAX_REWARD;
+
+  return score;
 };
 
 Learner.prototype.resetState = function() {
@@ -61,7 +63,7 @@ Learner.prototype.resetState = function() {
 NeuralNetLearner.prototype.prepare = function() {
   // Just keep using the old network for the new rounds
   if (!this.network)
-    this.network = new synaptic.Architect.Perceptron(20, 25, 1);
+    this.network = new synaptic.Architect.Perceptron(20,25, 1);
   this.state = {
     previousScore: this.score,
     totalReward: 0,
