@@ -185,19 +185,17 @@ NeuralNetLearner.prototype.think = function () {
   var Q, maxQ;
   var input;
 
-
-  // explore with epsilon chance
   var availableMoves = this.availableMoves();
 
-/*
   //softmax exploration
   var gibsFactors = [];
-  for (var i = 0; i < availableMoves.length; i++) {
-    moveCandidate = availableMoves[i];
-    input = this.input(moveCandidate);
-    Q = this.activate(input);
-    gibsFactors.push(Math.exp(Q/this.temperature));
-  }
+  var temperature = this.temperature;
+  console.log(temperature);
+  availableMoves.forEach (function(moveCandidate) {
+    input = self.input(moveCandidate);
+    Q = self.activate(input);
+    gibsFactors.push(Math.exp(Q/temperature));
+  });
   var sum = _.sum(gibsFactors);
   gibsFactors = gibsFactors.map(function(factor) {
     return factor / sum;
@@ -206,13 +204,14 @@ NeuralNetLearner.prototype.think = function () {
   var distr = prefixSum(gibsFactors);
   // select action
   move = Math.random();
-  for (index = 0; index < distr.length; index++) {
+  for (var index = 0; index < distr.length; index++) {
     if(move <= distr[index]){
-      move = availableMoves[index];
+      chosenMove = availableMoves[index];
       break;
     }
   }
-*/
+/*
+  // explore with epsilon chance
   if (maybe(this.epsilon)) {
     chosenMove = _.sample(availableMoves);
     chosenStateAction = this.input(chosenMove);
@@ -228,9 +227,8 @@ NeuralNetLearner.prototype.think = function () {
       }
     });
   }
-
-
-  console.log(move);
+*/
+  console.log(chosenMove);
   // Do move and get reward
   this.move(chosenMove);
   var reward = this.reward();
@@ -259,6 +257,12 @@ NeuralNetLearner.prototype.think = function () {
   this.state.moves += 1;
   this.state.totalReward += reward;
 
+};
+
+//TODO another decreasing schema might be preferred
+NeuralNetLearner.prototype.temperature = function () {
+  var t = this.state.moves + 1;
+  return 1 / Math.log(t + 0.00001);
 };
 
 NeuralNetLearner.prototype.toggleDebug = function () {
