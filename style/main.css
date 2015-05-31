@@ -507,7 +507,7 @@ hr {
   text-align: right;
 }
 
-.load-state {
+.btn  {
   display: inline-block;
   background: #8f7a66;
   border-radius: 3px;
@@ -520,6 +520,16 @@ hr {
   text-align: center;
   float: right;
   margin-top: -10px;
+  margin-left: 10px;
+}
+
+#below-state {
+  padding: 20px 0px;
+}
+
+.explanation {
+  margin-top: 50px;
+  clear: both;
 }
 
 .options {
