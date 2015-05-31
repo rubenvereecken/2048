@@ -427,6 +427,7 @@ Layer.prototype = {
 
   // projects a connection from this layer to another one
   project: function(layer, type, weights) {
+    weights = typeof weights !== 'undefined' ? weights : 0;
 
     if (layer instanceof require('./network'))
       layer = layer.layers.input;
