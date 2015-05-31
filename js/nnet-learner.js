@@ -194,13 +194,10 @@ NeuralNetLearner.prototype.think = function () {
     Q = this.activate(input);
     gibsFactors.push(Math.exp(Q/this.temperature));
   }
-  var sum=0;
-  for (var i=gibsFactors.length; i--;) {
-    sum+=gibsFactors[i];
-  }
-  for (index = 0; index < gibsFactors.length; index++) {
-    gibsFactors[index] /= sum;
-  }
+  var sum = _.sum(gibsFactors);
+  gibsFactors = gibsFactors.map(function(factor) {
+    return factor / sum;
+  });
   //cummulative distribution
   var distr = prefixSum(gibsFactors);
   // select action
@@ -212,25 +209,6 @@ NeuralNetLearner.prototype.think = function () {
     }
   }
 
-  /*
-   // explore with epsilon chance
-  if (maybe(this.epsilon)) {
-    move = _.sample(availableMoves);
-    chosen = this.input(move);
-  } else {
-    maxQ = -Infinity;
-    for (var i = 0; i < availableMoves.length; i++) {
-      moveCandidate = availableMoves[i];
-      input = this.input(moveCandidate);
-      Q = this.activate(input);
-      if (Q > maxQ) {
-        chosen = input;
-        maxQ = Q;
-        move = moveCandidate
-      }
-    }
-  }
-  */
 
   console.log(move);
   // Do move and get reward
