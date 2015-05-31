@@ -186,6 +186,7 @@ NeuralNetLearner.prototype.think = function () {
   var input;
 
   var availableMoves = this.availableMoves();
+  var availableStateActions = [];
 
   //softmax exploration
   var gibsFactors = [];
@@ -195,18 +196,22 @@ NeuralNetLearner.prototype.think = function () {
     input = self.input(moveCandidate);
     Q = self.activate(input);
     gibsFactors.push(Math.exp(Q/temperature));
+    availableStateActions.push(input);
   });
+
   var sum = _.sum(gibsFactors);
   gibsFactors = gibsFactors.map(function(factor) {
     return factor / sum;
   });
-  //cummulative distribution
+
+  //cumulative distribution
   var distr = prefixSum(gibsFactors);
   // select action
-  move = Math.random();
+  var poke = Math.random();
   for (var index = 0; index < distr.length; index++) {
-    if(move <= distr[index]){
+    if(poke <= distr[index]){
       chosenMove = availableMoves[index];
+      chosenStateAction = availableStateActions[index];
       break;
     }
   }
