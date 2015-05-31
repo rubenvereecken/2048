@@ -43,6 +43,8 @@ KeyboardInputManager.prototype.listen = function () {
     } else if  (event.which === 86) {
       $("#toggle-visual").prop('checked', !$("#toggle-visual").prop('checked'));
       self.toggleVisual.call(self, event);
+    } else if (event.which == 82) {
+      self.resetLearner.call(self, event);
     }
   });
 

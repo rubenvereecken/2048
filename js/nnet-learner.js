@@ -96,7 +96,7 @@ NeuralNetLearner.prototype.input = function(move) {
   var tiles = this.grid.flatten();
   for (var i = 0; i < tiles.length; i++) {
     if (tiles[i])
-      tiles[i] = Math.log2(tiles[i].value)/11;
+      tiles[i] = Math.log2(tiles[i].value);
     else
       tiles[i] = 0;
   }
@@ -135,6 +135,7 @@ NeuralNetLearner.prototype.think = function () {
   this.move(move);
   reward = this.reward();
   this.state.totalReward += reward;
+  console.log(chosen);
 
   // Update
   // Find the highest new Q value Q(s', a')
