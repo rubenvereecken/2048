@@ -29,9 +29,6 @@ NeuralNetLearner = (function(__super) {
     this.learnRate = 0.5;
     this.networkRate = 0.3;
 
-    //for softmax
-    this.temperature = 0.1;
-
     this.visualDelay = 500;
     this.visualizeState = false;
     this.keepHistory = true;
@@ -190,23 +187,27 @@ NeuralNetLearner.prototype.think = function () {
 
   //softmax exploration
   var gibsFactors = [];
-  var temperature = this.temperature;
-  console.log(temperature);
+  var temperature = this.temperature();
+ // console.log(temperature);
   availableMoves.forEach (function(moveCandidate) {
     input = self.input(moveCandidate);
     Q = self.activate(input);
     gibsFactors.push(Math.exp(Q/temperature));
     availableStateActions.push(input);
   });
+  //console.log(gibsFactors);
 
   var sum = _.sum(gibsFactors);
+  //console.log(sum);
   gibsFactors = gibsFactors.map(function(factor) {
     return factor / sum;
   });
+  //console.log(gibsFactors);
 
   //cumulative distribution
   var distr = prefixSum(gibsFactors);
   // select action
+ // console.log(distr);
   var poke = Math.random();
   for (var index = 0; index < distr.length; index++) {
     if(poke <= distr[index]){
@@ -233,7 +234,7 @@ NeuralNetLearner.prototype.think = function () {
     });
   }
 */
-  console.log(chosenMove);
+ // console.log(chosenMove);
   // Do move and get reward
   this.move(chosenMove);
   var reward = this.reward();
