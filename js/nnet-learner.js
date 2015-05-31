@@ -62,7 +62,7 @@ var rewardBasedOnGameScore = function() {
   return score / NeuralNetLearner.MAX_REWARD;
 };
 
-NeuralNetLearner.prototype.reward = rewardBasedOnGameScore;
+NeuralNetLearner.prototype.reward = rewardHighestOnly;
 
 Learner.prototype.resetState = function() {
   this.network = undefined;
