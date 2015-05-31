@@ -169,7 +169,7 @@ NeuralNetLearner.prototype.propagate = function(val) {
 NeuralNetLearner.prototype.think = function () {
   var reward;
   var move;
-  var chosen;
+  var stateAction;
   var Q, maxQ;
   var moveCandidate, input;
 
@@ -178,7 +178,7 @@ NeuralNetLearner.prototype.think = function () {
   var availableMoves = this.availableMoves();
   if (maybe(this.epsilon)) {
     move = _.sample(availableMoves);
-    chosen = this.input(move);
+    stateAction = this.input(move);
   } else {
     maxQ = 0;
     for (var i = 0; i < availableMoves.length; i++) {
@@ -186,7 +186,7 @@ NeuralNetLearner.prototype.think = function () {
       input = this.input(moveCandidate);
       Q = this.activate(input);
       if (Q > maxQ) {
-        chosen = input;
+        stateAction = input;
         maxQ = Q;
         move = moveCandidate
       }
@@ -207,18 +207,16 @@ NeuralNetLearner.prototype.think = function () {
     input = this.input(moveCandidate);
     Q = this.activate(input);
     if (Q > maxQ) {
-      chosen = input;
       maxQ = Q;
-      move = moveCandidate;
     }
   }
 
   // do the move again so the neural net is prepared to backpropagate the value
-  var oldQ = this.activate(chosen);
+  var oldQ = this.activate(stateAction);
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
   this.propagate(newQ);
   if (this.debug)
-    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosen));
+    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(stateAction));
 
   // finish up
   this.state.previousScore = this.score;
