@@ -21,11 +21,13 @@ NeuralNetLearner = (function(__super) {
     NeuralNetLearner.__super__.constructor.apply(this, arguments);
 
     this.epsilon = 0.1;
-    this.learnRate = 0.1;
-    this.gamma = 0.5;
-    this.networkRate = 0.1;
+    this.gamma = 0.95;
 
-    this.visualDelay = 5;
+    // these two influence each other...
+    this.learnRate = 0.4;
+    this.networkRate = 0.25;
+
+    this.visualDelay = 500;
   }
 
   return NeuralNetLearner;
@@ -101,11 +103,6 @@ NeuralNetLearner.prototype.input = function(move) {
   return [].concat(moveBits, tiles);
 };
 
-NeuralNetLearner.prototype.vectorFromMove = function(move) {
-  var moveBits = [0, 0, 0, 0];
-  moveBits[move] = 1;
-  return moveBits;
-};
 
 NeuralNetLearner.prototype.think = function () {
   var reward;
@@ -117,7 +114,6 @@ NeuralNetLearner.prototype.think = function () {
 
   // explore with epsilon chance
   var availableMoves = this.availableMoves();
-  console.log(availableMoves);
   if (maybe(this.epsilon)) {
     move = _.sample(availableMoves);
     chosen = this.input(move);
@@ -160,7 +156,7 @@ NeuralNetLearner.prototype.think = function () {
   var oldQ = this.network.activate(chosen)[0];
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
   this.network.propagate(this.networkRate, [newQ]);
-  console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ);
+  //console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ);
 
   // finish up
   this.state.previousScore = this.score;
@@ -190,6 +186,16 @@ NeuralNetLearner.prototype.deserializeState = function (state) {
 
 NeuralNetLearner.prototype.stop = function () {
   NeuralNetLearner.__super__.stop.apply(this, arguments);
+};
+
+NeuralNetLearner.prototype.whenGameFinishes = function () {
+  NeuralNetLearner.__super__.whenGameFinishes.apply(this, arguments);
+  this.history[this.roundsPlayed] = {
+    score: this.score,
+    reward: this.state.totalReward,
+    highestTile: this.state.highestTile,
+    moves: this.state.moves
+  }
 };
 
 
