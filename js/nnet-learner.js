@@ -24,7 +24,7 @@ NeuralNetLearner = (function(__super) {
     this.gamma = 0.95;
 
     // these two influence each other...
-    this.learnRate = 0.4;
+    this.learnRate = 0.9;
     this.networkRate = 0.25;
 
     this.visualDelay = 500;
@@ -51,6 +51,15 @@ var rewardHighestOnly = function() {
   return score;
 };
 
+var rewardHighestPunishOtherwise = function() {
+  var score = 0;
+  var currentHighest = this.grid.highestTile().value;
+  if (currentHighest > this.state.highestTile)
+    score += currentHighest;
+  else score -= 1;
+  return score;
+};
+
 var rewardBasedOnGameScore = function() {
   // Base reward is difference between current score and previous score
   // every merge thisis the value of the resulting tile
@@ -67,6 +76,7 @@ var rewardBasedOnGameScore = function() {
 NeuralNetLearner.prototype.reward = rewardHighestOnly;
 
 Learner.prototype.resetState = function() {
+  // die network die
   this.network = undefined;
   this.state = {
     previousScore: 0,
@@ -78,8 +88,17 @@ Learner.prototype.resetState = function() {
 
 NeuralNetLearner.prototype.prepare = function() {
   // Just keep using the old network for the new rounds
-  if (!this.network)
-    this.network = new synaptic.Architect.Perceptron(20, 25, 1);
+  if (!this.network) {
+    this.network = new synaptic.Architect.Perceptron(NeuralNetLearner.networkInputSize, 25, 1);
+/*    this.network.neurons().forEach(function (neuron) {
+      neuron.neuron.squash = Neuron.squash.IDENTITY;
+    });*/
+    // fuck you neural net
+    for (var i = 0; i < 10000; i++) {
+      this.activate(this.input(_.random(0, 3)));
+      this.network.propagate(1, [0]);
+    }
+  }
   this.state = {
     previousScore: this.score,
     totalReward: 0,
@@ -88,7 +107,7 @@ NeuralNetLearner.prototype.prepare = function() {
   };
 };
 
-NeuralNetLearner.prototype.input = function(move) {
+var inputGrid = function(move) {
   var moveBits = [0, 0, 0, 0];
   if (move) {
     moveBits[move] = 1;
@@ -103,6 +122,39 @@ NeuralNetLearner.prototype.input = function(move) {
   return [].concat(moveBits, tiles);
 };
 
+var inputTilings = function(move) {
+  var moveBits = [0, 0, 0, 0];
+  if (move) {
+    moveBits[move] = 1;
+  }
+  // 10 * 16 features
+  // 10 tiles, 0 to 9
+  var activeTiling = Math.round(Math.log2(this.grid.highestTile().value) - 1);
+  var emptyBefore = _.fill(new Array(activeTiling * this.size * this.size), 0);
+  var emptyAfter = _.fill(new Array((9 - activeTiling) * this.size * this.size), 0);
+  var tiles = this.grid.flatten();
+  for (var i = 0; i < tiles.length; i++) {
+    if (tiles[i])
+      tiles[i] = Math.log2(tiles[i].value);
+    else
+      tiles[i] = 0;
+  }
+  return [].concat(moveBits, emptyBefore, tiles, emptyAfter);
+};
+
+NeuralNetLearner.prototype.input = inputGrid;
+NeuralNetLearner.networkInputSize = 20;
+
+NeuralNetLearner.prototype.activate = function(input) {
+
+  return this.network.activate(input)[0] * NeuralNetLearner.MAX_REWARD;
+};
+
+NeuralNetLearner.prototype.propagate = function(val) {
+  // adjusted should be in [0, 1]
+  var adjusted = val / NeuralNetLearner.MAX_REWARD;
+  return this.network.propagate(this.networkRate, [adjusted]);
+};
 
 NeuralNetLearner.prototype.think = function () {
   var reward;
@@ -122,7 +174,7 @@ NeuralNetLearner.prototype.think = function () {
     for (var i = 0; i < availableMoves.length; i++) {
       moveCandidate = availableMoves[i];
       input = this.input(moveCandidate);
-      Q = this.network.activate(input)[0];
+      Q = this.activate(input);
       if (Q > maxQ) {
         chosen = input;
         maxQ = Q;
@@ -134,8 +186,6 @@ NeuralNetLearner.prototype.think = function () {
   // Do move and get reward
   this.move(move);
   reward = this.reward();
-  this.state.totalReward += reward;
-  console.log(chosen);
 
   // Update
   // Find the highest new Q value Q(s', a')
@@ -145,7 +195,7 @@ NeuralNetLearner.prototype.think = function () {
     moveCandidate = availableMoves[i];
     // this uses the new state we're currently in
     input = this.input(moveCandidate);
-    Q = this.network.activate(input)[0];
+    Q = this.activate(input);
     if (Q > maxQ) {
       chosen = input;
       maxQ = Q;
@@ -154,15 +204,16 @@ NeuralNetLearner.prototype.think = function () {
   }
 
   // do the move again so the neural net is prepared to backpropagate the value
-  var oldQ = this.network.activate(chosen)[0];
+  var oldQ = this.activate(chosen);
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
-  this.network.propagate(this.networkRate, [newQ]);
-  //console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ);
+  this.propagate(newQ);
+  //console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosen));
 
   // finish up
   this.state.previousScore = this.score;
   this.state.highestTile = this.grid.highestTile().value;
   this.state.moves += 1;
+  this.state.totalReward += reward;
 
 };
 
@@ -194,9 +245,14 @@ NeuralNetLearner.prototype.whenGameFinishes = function () {
   this.history[this.roundsPlayed] = {
     score: this.score,
     reward: this.state.totalReward,
-    highestTile: this.state.highestTile,
+    highestTile: this.grid.highestTile().value,
     moves: this.state.moves
   }
+};
+
+Learner.prototype.showState = function() {
+  // sssshh
+  //this.actuator.showState(this.serializeState());
 };
 
 
