@@ -22,8 +22,10 @@ NeuralNetLearner = (function(__super) {
 
     this.epsilon = 0.1;
     this.learnRate = 0.1;
-    this.gamma = 0.2;
+    this.gamma = 0.5;
     this.networkRate = 0.1;
+
+    this.visualDelay = 5;
   }
 
   return NeuralNetLearner;
@@ -35,8 +37,19 @@ var maybe = function(p) {
 
 NeuralNetLearner.MAX_REWARD = 2048;
 
+/**
+ * Reward only if new merge is higher
+ * @returns {number}
+ */
+var rewardHighestOnly = function() {
+  var score = 0;
+  var currentHighest = this.grid.highestTile().value;
+  if (currentHighest > this.state.highestTile)
+    score += currentHighest;
+  return score;
+};
 
-NeuralNetLearner.prototype.reward = function() {
+var rewardBasedOnGameScore = function() {
   // Base reward is difference between current score and previous score
   // every merge thisis the value of the resulting tile
   var score = this.score - this.state.previousScore;
@@ -45,16 +58,19 @@ NeuralNetLearner.prototype.reward = function() {
   // Give an extra reward if a new highest tile has been reached, proportional to its value
 /*  var currentHighest = this.grid.highestTile().value;
   if (currentHighest > this.state.highestTile)
-    score += this.state.highestTile;*/
+    score += currentHighest;*/
   return score / NeuralNetLearner.MAX_REWARD;
 };
+
+NeuralNetLearner.prototype.reward = rewardBasedOnGameScore;
 
 Learner.prototype.resetState = function() {
   this.network = undefined;
   this.state = {
     previousScore: 0,
     totalReward: 0,
-    highestTile: 0
+    highestTile: 0,
+    moves: 0
   };
 };
 
@@ -65,7 +81,8 @@ NeuralNetLearner.prototype.prepare = function() {
   this.state = {
     previousScore: this.score,
     totalReward: 0,
-    highestTile: 0
+    highestTile: 0,
+    moves: 0
   };
 };
 
@@ -99,12 +116,15 @@ NeuralNetLearner.prototype.think = function () {
 
 
   // explore with epsilon chance
+  var availableMoves = this.availableMoves();
+  console.log(availableMoves);
   if (maybe(this.epsilon)) {
-    move = _.random(0, 3);
+    move = _.sample(availableMoves);
     chosen = this.input(move);
   } else {
     maxQ = 0;
-    for (moveCandidate in [0, 1, 2, 3]) {
+    for (var i = 0; i < availableMoves.length; i++) {
+      moveCandidate = availableMoves[i];
       input = this.input(moveCandidate);
       Q = this.network.activate(input)[0];
       if (Q > maxQ) {
@@ -123,7 +143,9 @@ NeuralNetLearner.prototype.think = function () {
   // Update
   // Find the highest new Q value Q(s', a')
   maxQ = 0;
-  for (moveCandidate in [0, 1, 2, 3]) {
+  availableMoves = this.availableMoves();
+  for (var i = 0; i < availableMoves.length; i++) {
+    moveCandidate = availableMoves[i];
     // this uses the new state we're currently in
     input = this.input(moveCandidate);
     Q = this.network.activate(input)[0];
@@ -138,9 +160,12 @@ NeuralNetLearner.prototype.think = function () {
   var oldQ = this.network.activate(chosen)[0];
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
   this.network.propagate(this.networkRate, [newQ]);
+  console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ);
+
   // finish up
   this.state.previousScore = this.score;
   this.state.highestTile = this.grid.highestTile().value;
+  this.state.moves += 1;
 
 };
 
@@ -161,4 +186,56 @@ NeuralNetLearner.prototype.deserializeState = function (state) {
     this.network = Network.fromJSON(state.network);
     delete this.state.network;
   }
+};
+
+NeuralNetLearner.prototype.stop = function () {
+  NeuralNetLearner.__super__.stop.apply(this, arguments);
+};
+
+
+NeuralNetLearner.prototype.availableMoves = function () {
+  // 0: up, 1: right, 2: down, 3: left
+  var self = this;
+  var cell, tile;
+  var vector;
+  var traversals;
+  var moved;
+  var x, y;
+  var availableMoves = [];
+  var direction;
+  var directions = [0, 1, 2, 3];
+
+  this.prepareTiles();
+
+  for (var i = 0; i < directions.length; i++) {
+    direction = directions[i];
+    vector     = this.getVector(direction);
+    traversals = this.buildTraversals(vector);
+    moved = false;
+
+    // Traverse the grid in the right direction and move tiles
+    for (var j = 0; j < traversals.x.length; j++){
+      x = traversals.x[j];
+      for (var k = 0; k < traversals.y.length; k++) {
+        y = traversals.y[k];
+        cell = { x: x, y: y };
+        tile = self.grid.cellContent(cell);
+
+        if (tile) {
+          var positions = self.findFarthestPosition(cell, vector);
+          var next      = self.grid.cellContent(positions.next);
+
+          if ((next && next.value === tile.value && !next.mergedFrom) ||
+              !this.positionsEqual(tile, positions.farthest)) {
+            moved = true;
+            availableMoves.push(direction);
+            break;
+          }
+        }
+      }
+      if (moved) break;
+    }
+  }
+
+  return availableMoves;
 };
