@@ -27,6 +27,9 @@ NeuralNetLearner = (function(__super) {
     this.learnRate = 0.4;
     this.networkRate = 0.25;
 
+    //for softmax
+    this.temperature = 0.1;
+
     this.visualDelay = 500;
   }
 
@@ -80,11 +83,11 @@ NeuralNetLearner.prototype.prepare = function() {
   // Just keep using the old network for the new rounds
   if (!this.network) {
     console.info("Initializing network");
-    this.network = new synaptic.Architect.Perceptron(20, 25, 1);
-    console.log(this.network.layers.output.list );
+    this.network = new synaptic.Architect.LSTM(20, 25, 1);
+    /*console.log(this.network.layers.output.list );
     this.network.layers.output.list.forEach(function (neuron) {
       neuron.squash = Neuron.squash.IDENTITY;
-    });
+    });*/
   }
   this.state = {
     previousScore: this.score,
@@ -109,6 +112,14 @@ NeuralNetLearner.prototype.input = function(move) {
   return [].concat(moveBits, tiles);
 };
 
+var prefixSum = function (arr) {
+  var builder = function (acc, n) {
+    var lastNum = acc.length > 0 ? acc[acc.length-1] : 0;
+    acc.push(lastNum + n);
+    return acc;
+  };
+  return _.reduce(arr, builder, []);
+};
 
 NeuralNetLearner.prototype.think = function () {
   var reward;
@@ -117,9 +128,35 @@ NeuralNetLearner.prototype.think = function () {
   var Q, maxQ;
   var moveCandidate, input;
 
-
-  // explore with epsilon chance
   var availableMoves = this.availableMoves();
+  //softmax exploration
+  var gibsFactors = [];
+  for (var i = 0; i < availableMoves.length; i++) {
+    moveCandidate = availableMoves[i];
+    input = this.input(moveCandidate);
+    Q = this.network.activate(input)[0];
+    gibsFactors.push(Math.exp(Q/this.temperature));
+  }
+  var sum=0;
+  for (var i=gibsFactors.length; i--;) {
+    sum+=gibsFactors[i];
+  }
+  for (index = 0; index < gibsFactors.length; index++) {
+    gibsFactors[index] /= sum;
+  }
+  //cummulative distribution
+  var distr = prefixSum(gibsFactors);
+  // select action
+  move = Math.random();
+  for (index = 0; index < distr.length; index++) {
+    if(move <= distr[index]){
+      move = availableMoves[index];
+      break;
+    }
+  }
+
+  /*
+   // explore with epsilon chance
   if (maybe(this.epsilon)) {
     move = _.sample(availableMoves);
     chosen = this.input(move);
@@ -136,8 +173,9 @@ NeuralNetLearner.prototype.think = function () {
       }
     }
   }
+  */
 
-  //console.log(move);
+  console.log(move);
   // Do move and get reward
   this.move(move);
   reward = this.reward();
