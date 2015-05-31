@@ -81,8 +81,9 @@ NeuralNetLearner.prototype.prepare = function() {
   if (!this.network) {
     console.info("Initializing network");
     this.network = new synaptic.Architect.Perceptron(20, 25, 1);
-    this.network.neurons().forEach(function (neuron) {
-      neuron.neuron.squash = Neuron.squash.IDENTITY;
+    console.log(this.network.layers.output.list );
+    this.network.layers.output.list.forEach(function (neuron) {
+      neuron.squash = Neuron.squash.IDENTITY;
     });
   }
   this.state = {
@@ -101,7 +102,7 @@ NeuralNetLearner.prototype.input = function(move) {
   var tiles = this.grid.flatten();
   for (var i = 0; i < tiles.length; i++) {
     if (tiles[i])
-      tiles[i] = tiles[i].value;
+      tiles[i] = Math.log2(tiles[i].value)/11;
     else
       tiles[i] = 0;
   }
@@ -123,7 +124,7 @@ NeuralNetLearner.prototype.think = function () {
     move = _.sample(availableMoves);
     chosen = this.input(move);
   } else {
-    maxQ = 0;
+    maxQ = -Infinity;
     for (var i = 0; i < availableMoves.length; i++) {
       moveCandidate = availableMoves[i];
       input = this.input(moveCandidate);
@@ -136,6 +137,7 @@ NeuralNetLearner.prototype.think = function () {
     }
   }
 
+  //console.log(move);
   // Do move and get reward
   this.move(move);
   reward = this.reward();
