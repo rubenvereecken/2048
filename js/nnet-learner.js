@@ -191,7 +191,6 @@ NeuralNetLearner.prototype.think = function () {
   for (var i = 0; i < availableMoves.length; i++) {
     moveCandidate = availableMoves[i];
     input = this.input(moveCandidate);
-    console.log(input);
     Q = this.activate(input);
     gibsFactors.push(Math.exp(Q/this.temperature));
   }
