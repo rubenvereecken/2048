@@ -190,6 +190,12 @@ NeuralNetLearner.prototype.stop = function () {
 
 NeuralNetLearner.prototype.whenGameFinishes = function () {
   NeuralNetLearner.__super__.whenGameFinishes.apply(this, arguments);
+  this.history[this.roundsPlayed] = {
+    score: this.score,
+    reward: this.state.totalReward,
+    highestTile: this.state.highestTile,
+    moves: this.state.moves
+  }
 };
 
 

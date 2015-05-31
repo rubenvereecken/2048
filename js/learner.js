@@ -139,6 +139,7 @@ Learner.prototype.start = function (rounds) {
   this.storageManager.set('rounds', rounds);
   this.storageManager.setBestScore(0);
   this.running = true;
+  this.history = {};
   this.showState();
   // TODO maybe we don't want to restart? worth a thought
   this.restart();
