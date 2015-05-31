@@ -26,9 +26,19 @@ RandomLearner = (function(__super) {
 
 
 RandomLearner.prototype.prepare = function() {
-  this.state = {};
+  this.state = {moves: 0};
 };
 
 RandomLearner.prototype.think = function () {
   this.move(_.random(0, 3));
+  this.state.moves += 1;
+};
+
+RandomLearner.prototype.whenGameFinishes = function () {
+  RandomLearner.__super__.whenGameFinishes.apply(this, arguments);
+  this.history[this.roundsPlayed] = {
+    score: this.score,
+    highestTile: this.grid.highestTile().value,
+    moves: this.state.moves
+  }
 };
