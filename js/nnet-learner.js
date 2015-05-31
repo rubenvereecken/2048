@@ -31,6 +31,7 @@ NeuralNetLearner = (function(__super) {
 
     this.visualDelay = 500;
     this.visualizeState = false;
+    this.keepHistory = true;
   }
 
   return NeuralNetLearner;
@@ -255,13 +256,22 @@ NeuralNetLearner.prototype.stop = function () {
 
 NeuralNetLearner.prototype.whenGameFinishes = function () {
   NeuralNetLearner.__super__.whenGameFinishes.apply(this, arguments);
-  this.history[this.roundsPlayed] = {
-    score: this.score,
-    reward: this.state.totalReward,
-    highestTile: this.grid.highestTile().value,
-    moves: this.state.moves
-  }
   this.state.gamesPlayed += 1;
+
+  if (this.keepHistory) {
+    if (_.isEmpty(this.history)) {
+      this.history = {
+        score: [],
+        reward: [],
+        highest: [],
+        moves: []
+      }
+    }
+    this.history.score.push(this.score);
+    this.history.reward.push(this.state.totalReward);
+    this.history.highest.push(this.grid.highestTile().value);
+    this.history.moves.push(this.state.moves);
+  }
 };
 
 Learner.prototype.showState = function() {
