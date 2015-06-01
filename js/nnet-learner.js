@@ -23,11 +23,11 @@ NeuralNetLearner = (function(__super) {
 
     this.epsilon = 0.1;
     this.gamma = 0.95;
-    this.hiddenLayerSize = 15;
+    this.hiddenLayerSize = 25;
 
     // these two influence each other...
     this.learnRate = 0.5;
-    this.networkRate = 0.3;
+    this.networkRate = 0.75;
 
     this.visualDelay = 500;
     this.visualizeState = false;
@@ -55,12 +55,13 @@ var rewardHighestOnly = function() {
   return score;
 };
 
-var rewardHighestPunishOtherwise = function() {
+var rewardHighestPunishGameOver = function() {
   var score = 0;
   var currentHighest = this.grid.highestTile().value;
   if (currentHighest > this.state.highestTile)
     score += currentHighest;
-  else score -= 1;
+  if (this.over && !this.won)
+    score -= 1024;
   return score;
 };
 
@@ -68,16 +69,16 @@ var rewardBasedOnGameScore = function() {
   // Base reward is difference between current score and previous score
   // every merge thisis the value of the resulting tile
   var score = this.score - this.state.previousScore;
-  if (score > NeuralNetLearner.MAX_REWARD)
-    console.debug("Exceeded max reward " + score);
   // Give an extra reward if a new highest tile has been reached, proportional to its value
 /*  var currentHighest = this.grid.highestTile().value;
   if (currentHighest > this.state.highestTile)
     score += currentHighest;*/
-  return score / NeuralNetLearner.MAX_REWARD;
+  if (this.over && !this.won)
+    score -= 1024;
+  return score;
 };
 
-NeuralNetLearner.prototype.reward = rewardHighestOnly;
+NeuralNetLearner.prototype.reward = rewardHighestPunishGameOver;
 
 Learner.prototype.resetState = function() {
   // die network die
@@ -134,6 +135,54 @@ var inputGrid = function(move) {
   return [].concat(moveBits, tiles);
 };
 
+var inputExtended = function(move) {
+  var moveBits = [0, 0, 0, 0];
+  if (move) {
+    moveBits[move] = 1;
+  }
+  var tiles = this.grid.flatten();
+  for (var i = 0; i < tiles.length; i++) {
+    if (tiles[i])
+      tiles[i] = Math.log2(tiles[i].value);
+    else
+      tiles[i] = 0;
+  }
+  var occupiedCells = this.size * this.size - this.grid.availableCells().length;
+  // rows and columns get mixed up but its not so bad
+  var rowCounts = new Array(this.size);
+  var colCounts = new Array(this.size);
+  _.fill(rowCounts, 0);
+  _.fill(colCounts, 0);
+
+  var previousX = new Array(this.size);
+  var previousY = new Array(this.size);
+  _.fill(previousX, 0);
+  _.fill(previousY, 0);
+
+  var monotoneX = new Array(this.size);
+  var monotoneY = new Array(this.size);
+  _.fill(monotoneX, 0);
+  _.fill(monotoneY, 0);
+
+  var tile;
+  for (var x = 0; x < this.size; x++) {
+    for (var y = 0; y < this.size; y++) {
+      if (tile = this.grid.cells[x][y]) {
+        rowCounts[x] += 1;
+        colCounts[y] += 1;
+        monotoneX[x] += (tile.value >= previousX[x]) ? 1 : -1
+        monotoneY[y] += (tile.value >= previousY[y]) ? 1 : -1
+
+        previousX[x] = tile.value;
+        previousY[y] = tile.value
+      }
+    }
+  }
+
+
+  return [].concat(moveBits, tiles, monotoneX, monotoneY);
+};
+
 var inputTilings = function(move) {
   var moveBits = [0, 0, 0, 0];
   if (move) {
@@ -154,8 +203,8 @@ var inputTilings = function(move) {
   return [].concat(moveBits, emptyBefore, tiles, emptyAfter);
 };
 
-NeuralNetLearner.prototype.input = inputGrid;
-NeuralNetLearner.networkInputSize = 20; // 20 or 164
+NeuralNetLearner.prototype.input = inputExtended;
+NeuralNetLearner.networkInputSize = 28; // 20 or 164
 
 NeuralNetLearner.prototype.activate = function(input) {
   return this.network.activate(input)[0] * NeuralNetLearner.MAX_REWARD;
@@ -164,6 +213,7 @@ NeuralNetLearner.prototype.activate = function(input) {
 NeuralNetLearner.prototype.propagate = function(val) {
   // adjusted should be in [0, 1]
   var adjusted = val / NeuralNetLearner.MAX_REWARD;
+  //adjusted = adjusted > 0 ? adjusted : 0;
   return this.network.propagate(this.networkRate, [adjusted]);
 };
 
@@ -210,9 +260,11 @@ NeuralNetLearner.prototype.think = function () {
   // do the move again so the neural net is prepared to backpropagate the value
   var oldQ = this.activate(chosenStateAction);
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
-  this.propagate(newQ);
+  //for (i in _.range(10))
+    this.propagate(newQ);
+
   if (this.debug)
-    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosenStateAction));
+    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ +" finalQ = " + this.activate(chosenStateAction));
 
   // finish up
   this.state.previousScore = this.score;
