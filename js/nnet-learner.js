@@ -184,7 +184,7 @@ NeuralNetLearner.prototype.think = function () {
 
   var availableMoves = this.availableMoves();
   var availableStateActions = [];
-
+/*
   //softmax exploration
   var gibsFactors = [];
   var temperature = this.temperature();
@@ -216,7 +216,7 @@ NeuralNetLearner.prototype.think = function () {
       break;
     }
   }
-/*
+*/
   // explore with epsilon chance
   if (maybe(this.epsilon)) {
     chosenMove = _.sample(availableMoves);
@@ -233,8 +233,8 @@ NeuralNetLearner.prototype.think = function () {
       }
     });
   }
-*/
- // console.log(chosenMove);
+
+  //console.log(chosenMove);
   // Do move and get reward
   this.move(chosenMove);
   var reward = this.reward();
