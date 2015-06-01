@@ -170,11 +170,11 @@ var inputExtended = function(move) {
       if (tile = this.grid.cells[x][y]) {
         rowCounts[x] += 1;
         colCounts[y] += 1;
-        monotoneX[x] += (tile.value >= previousX[x]) ? 1 : -1
-        monotoneY[y] += (tile.value >= previousY[y]) ? 1 : -1
+        monotoneX[x] += (tile.value >= previousX[x]) ? 1 : -1;
+        monotoneY[y] += (tile.value >= previousY[y]) ? 1 : -1;
 
         previousX[x] = tile.value;
-        previousY[y] = tile.value
+        previousY[y] = tile.value;
       }
     }
   }

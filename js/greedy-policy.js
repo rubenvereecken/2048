@@ -55,6 +55,10 @@ GreedyNeuralNet.prototype.prepare = function() {
         this.input = inputTilings;
         console.info("set input to inputTilings");
         break;
+      case 36:
+        this.input = inputExtended;
+        console.info("set input to inputExtended");
+        break;
       default:
         throw "UNSUPPORTED NETWORK INPUTS"
     }
@@ -133,7 +137,7 @@ var inputExtended = function(move) {
   }
 
 
-  return [].concat(moveBits, tiles, monotoneX, monotoneY);
+  return [].concat(moveBits, tiles, rowCounts, colCounts, monotoneX, monotoneY);
 };
 
 var inputTilings = function(move) {
@@ -179,7 +183,6 @@ GreedyNeuralNet.prototype.think = function () {
       chosenMove = moveCandidate
     }
   });
-
 
   // Do move and get reward
   this.move(chosenMove);
