@@ -203,8 +203,8 @@ var inputTilings = function(move) {
   return [].concat(moveBits, emptyBefore, tiles, emptyAfter);
 };
 
-NeuralNetLearner.prototype.input = inputExtended;
-NeuralNetLearner.networkInputSize = 28; // 20 or 164
+NeuralNetLearner.prototype.input = inputGrid;
+NeuralNetLearner.networkInputSize = 20; // 20 or 164
 
 NeuralNetLearner.prototype.activate = function(input) {
   return this.network.activate(input)[0] * NeuralNetLearner.MAX_REWARD;
@@ -213,7 +213,7 @@ NeuralNetLearner.prototype.activate = function(input) {
 NeuralNetLearner.prototype.propagate = function(val) {
   // adjusted should be in [0, 1]
   var adjusted = val / NeuralNetLearner.MAX_REWARD;
-  //adjusted = adjusted > 0 ? adjusted : 0;
+  adjusted = adjusted > 0 ? adjusted : 0;
   return this.network.propagate(this.networkRate, [adjusted]);
 };
 
