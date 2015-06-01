@@ -2,3 +2,15 @@
 
 .idea
 bower_components
+stateSoftmaxMathLogYouri2.json
+stateSoftmaxMathLogYouri.json
+stateGreedyYouri.json
+stateEpsilonGreedy01Youri.json
+historySoftmaxMathLogYouri2.json
+historySoftmaxMathLogYouri2.csv
+historySoftmaxMathLogYouri.json
+historySoftmaxMathLogYouri.csv
+historyGreedyYouri.json
+historyGreedyYouri.csv
+historyEpsilonGreedy01Youri.json
+historyEpsilonGreedy01Youri.csv
