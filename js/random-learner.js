@@ -36,9 +36,17 @@ RandomLearner.prototype.think = function () {
 
 RandomLearner.prototype.whenGameFinishes = function () {
   RandomLearner.__super__.whenGameFinishes.apply(this, arguments);
-  this.history[this.roundsPlayed] = {
-    score: this.score,
-    highestTile: this.grid.highestTile().value,
-    moves: this.state.moves
+  if (true) {
+    if (_.isEmpty(this.history)) {
+      this.history = {
+        score: [],
+        reward: [],
+        highest: [],
+        moves: []
+      }
+    }
+    this.history.score.push(this.score);
+    this.history.highest.push(this.grid.highestTile().value);
+    this.history.moves.push(this.state.moves);
   }
 };
