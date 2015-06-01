@@ -21,7 +21,7 @@ NeuralNetLearner = (function(__super) {
     NeuralNetLearner.__super__.constructor.apply(this, arguments);
 
 
-    this.epsilon = 0.1;
+    this.epsilon = 0.01;
     this.gamma = 0.95;
     this.hiddenLayerSize = 25;
 
@@ -29,8 +29,8 @@ NeuralNetLearner = (function(__super) {
     this.learnRate = 0.5;
     this.networkRate = 0.75;
 
-    this.visualDelay = 500;
-    this.visualizeState = false;
+    this.visualDelay = 250;
+    this.visualizeState = true;
     this.keepHistory = true;
   }
 
@@ -78,7 +78,7 @@ var rewardBasedOnGameScore = function() {
   return score;
 };
 
-NeuralNetLearner.prototype.reward = rewardHighestPunishGameOver;
+NeuralNetLearner.prototype.reward = rewardBasedOnGameScore;
 
 Learner.prototype.resetState = function() {
   // die network die
@@ -203,7 +203,7 @@ var inputTilings = function(move) {
   return [].concat(moveBits, emptyBefore, tiles, emptyAfter);
 };
 
-NeuralNetLearner.prototype.input = inputGrid;
+NeuralNetLearner.prototype.input = inputTilings;
 NeuralNetLearner.networkInputSize = 20; // 20 or 164
 
 NeuralNetLearner.prototype.activate = function(input) {
