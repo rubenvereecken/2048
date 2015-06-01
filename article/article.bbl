@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{appstores}
 Ariel.
@@ -15,9 +15,39 @@ Ronald~A. Howard.
 \newblock {\em {Dynamic Programming and Markov Processes}}.
 \newblock MIT\~{}Press, Cambridge, Massachusetts, 1960.
 
+\bibitem{huang2005reinforcement}
+Bing-Qiang Huang, Guang-Yi Cao, and Min Guo.
+\newblock Reinforcement learning neural network to the problem of autonomous
+  mobile robot obstacle avoidance.
+\newblock In {\em Machine Learning and Cybernetics, 2005. Proceedings of 2005
+  International Conference on}, volume~1, pages 85--89. IEEE, 2005.
+
+\bibitem{miller1995neural}
+W~Thomas Miller, Paul~J Werbos, and Richard~S Sutton.
+\newblock {\em Neural networks for control}.
+\newblock MIT press, 1995.
+
+\bibitem{nneo}
+nneonneo.
+\newblock 2048-ai, 2015.
+
+\bibitem{ov3y}
+ov3y.
+\newblock {2048-AI}, 2015.
+
+\bibitem{riedmiller2005neural}
+Martin Riedmiller.
+\newblock Neural fitted q iteration--first experiences with a data efficient
+  neural reinforcement learning method.
+\newblock In {\em Machine Learning: ECML 2005}, pages 317--328. Springer, 2005.
+
 \bibitem{sutton1998rl}
 Richard~S. Sutton and Andrew~G. Barto.
 \newblock {\em Introduction to Reinforcement Learning}.
 \newblock MIT Press, Cambridge, MA, USA, 1st edition, 1998.
+
+\bibitem{underflow}
+Underflow.
+\newblock reinforcement-2048, 2014.
 
 \end{thebibliography}

@@ -57,6 +57,8 @@ KeyboardInputManager.prototype.listen = function () {
   this.bindButtonPress(".reset-learner", this.resetLearner);
   this.bindButtonPress(".load-state", this.loadState);
   this.bindButtonPress("#toggle-visual", this.toggleVisual);
+  this.bindButtonPress(".download-state", this.downloadState);
+  this.bindButtonPress(".download-history", this.downloadHistory);
 };
 
 KeyboardInputManager.prototype.toggleLearner = function (event) {
@@ -125,4 +127,18 @@ KeyboardInputManager.prototype.bindButtonPress = function (selector, fn) {
   var button = document.querySelector(selector);
   button.addEventListener("click", fn.bind(this));
   button.addEventListener(this.eventTouchend, fn.bind(this));
+};
+
+KeyboardInputManager.prototype.downloadState = function (event) {
+  event.preventDefault();
+  console.save(window.AI.serialize(), "state.json");
+};
+
+KeyboardInputManager.prototype.downloadHistory = function (event) {
+  event.preventDefault();
+  if (_.isEmpty(window.AI.history)) {
+    console.log("History empty");
+  } else {
+    console.save(window.AI.history, "history.json");
+  }
 };

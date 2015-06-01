@@ -20,14 +20,18 @@ NeuralNetLearner = (function(__super) {
   function NeuralNetLearner() {
     NeuralNetLearner.__super__.constructor.apply(this, arguments);
 
+
     this.epsilon = 0.1;
     this.gamma = 0.95;
+    this.hiddenLayerSize = 25;
 
     // these two influence each other...
-    this.learnRate = 0.9;
-    this.networkRate = 0.25;
+    this.learnRate = 0.5;
+    this.networkRate = 0.75;
 
     this.visualDelay = 500;
+    this.visualizeState = false;
+    this.keepHistory = true;
   }
 
   return NeuralNetLearner;
@@ -51,12 +55,13 @@ var rewardHighestOnly = function() {
   return score;
 };
 
-var rewardHighestPunishOtherwise = function() {
+var rewardHighestPunishGameOver = function() {
   var score = 0;
   var currentHighest = this.grid.highestTile().value;
   if (currentHighest > this.state.highestTile)
     score += currentHighest;
-  else score -= 1;
+  if (this.over && !this.won)
+    score -= 1024;
   return score;
 };
 
@@ -64,16 +69,16 @@ var rewardBasedOnGameScore = function() {
   // Base reward is difference between current score and previous score
   // every merge thisis the value of the resulting tile
   var score = this.score - this.state.previousScore;
-  if (score > NeuralNetLearner.MAX_REWARD)
-    console.debug("Exceeded max reward " + score);
   // Give an extra reward if a new highest tile has been reached, proportional to its value
 /*  var currentHighest = this.grid.highestTile().value;
   if (currentHighest > this.state.highestTile)
     score += currentHighest;*/
-  return score / NeuralNetLearner.MAX_REWARD;
+  if (this.over && !this.won)
+    score -= 1024;
+  return score;
 };
 
-NeuralNetLearner.prototype.reward = rewardHighestOnly;
+NeuralNetLearner.prototype.reward = rewardHighestPunishGameOver;
 
 Learner.prototype.resetState = function() {
   // die network die
@@ -82,29 +87,37 @@ Learner.prototype.resetState = function() {
     previousScore: 0,
     totalReward: 0,
     highestTile: 0,
-    moves: 0
+    moves: 0,
+    gamesPlayed: 0
   };
 };
 
 NeuralNetLearner.prototype.prepare = function() {
   // Just keep using the old network for the new rounds
   if (!this.network) {
-    this.network = new synaptic.Architect.Perceptron(NeuralNetLearner.networkInputSize, 25, 1);
+    this.network = new synaptic.Architect.Perceptron(NeuralNetLearner.networkInputSize, this.hiddenLayerSize, 1);
 /*    this.network.neurons().forEach(function (neuron) {
       neuron.neuron.squash = Neuron.squash.IDENTITY;
     });*/
     // fuck you neural net
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 100000; i++) {
       this.activate(this.input(_.random(0, 3)));
       this.network.propagate(1, [0]);
     }
   }
-  this.state = {
+
+  // long term state, over multiple sessions (keep values)
+  _.defaults(this.state, {
+    gamesPlayed: 0
+  });
+
+  // state for a single session, overwrite previous values
+  _.extend(this.state, {
     previousScore: this.score,
     totalReward: 0,
     highestTile: 0,
     moves: 0
-  };
+  });
 };
 
 var inputGrid = function(move) {
@@ -120,6 +133,54 @@ var inputGrid = function(move) {
       tiles[i] = 0;
   }
   return [].concat(moveBits, tiles);
+};
+
+var inputExtended = function(move) {
+  var moveBits = [0, 0, 0, 0];
+  if (move) {
+    moveBits[move] = 1;
+  }
+  var tiles = this.grid.flatten();
+  for (var i = 0; i < tiles.length; i++) {
+    if (tiles[i])
+      tiles[i] = Math.log2(tiles[i].value);
+    else
+      tiles[i] = 0;
+  }
+  var occupiedCells = this.size * this.size - this.grid.availableCells().length;
+  // rows and columns get mixed up but its not so bad
+  var rowCounts = new Array(this.size);
+  var colCounts = new Array(this.size);
+  _.fill(rowCounts, 0);
+  _.fill(colCounts, 0);
+
+  var previousX = new Array(this.size);
+  var previousY = new Array(this.size);
+  _.fill(previousX, 0);
+  _.fill(previousY, 0);
+
+  var monotoneX = new Array(this.size);
+  var monotoneY = new Array(this.size);
+  _.fill(monotoneX, 0);
+  _.fill(monotoneY, 0);
+
+  var tile;
+  for (var x = 0; x < this.size; x++) {
+    for (var y = 0; y < this.size; y++) {
+      if (tile = this.grid.cells[x][y]) {
+        rowCounts[x] += 1;
+        colCounts[y] += 1;
+        monotoneX[x] += (tile.value >= previousX[x]) ? 1 : -1
+        monotoneY[y] += (tile.value >= previousY[y]) ? 1 : -1
+
+        previousX[x] = tile.value;
+        previousY[y] = tile.value
+      }
+    }
+  }
+
+
+  return [].concat(moveBits, tiles, monotoneX, monotoneY);
 };
 
 var inputTilings = function(move) {
@@ -143,71 +204,67 @@ var inputTilings = function(move) {
 };
 
 NeuralNetLearner.prototype.input = inputGrid;
-NeuralNetLearner.networkInputSize = 20;
+NeuralNetLearner.networkInputSize = 20; // 20 or 164
 
 NeuralNetLearner.prototype.activate = function(input) {
-
   return this.network.activate(input)[0] * NeuralNetLearner.MAX_REWARD;
 };
 
 NeuralNetLearner.prototype.propagate = function(val) {
   // adjusted should be in [0, 1]
   var adjusted = val / NeuralNetLearner.MAX_REWARD;
+  adjusted = adjusted > 0 ? adjusted : 0;
   return this.network.propagate(this.networkRate, [adjusted]);
 };
 
 NeuralNetLearner.prototype.think = function () {
-  var reward;
-  var move;
-  var chosen;
+  var self = this;
+  var chosenMove, chosenStateAction;
   var Q, maxQ;
-  var moveCandidate, input;
+  var input;
 
 
   // explore with epsilon chance
   var availableMoves = this.availableMoves();
   if (maybe(this.epsilon)) {
-    move = _.sample(availableMoves);
-    chosen = this.input(move);
+    chosenMove = _.sample(availableMoves);
+    chosenStateAction = this.input(chosenMove);
   } else {
-    maxQ = 0;
-    for (var i = 0; i < availableMoves.length; i++) {
-      moveCandidate = availableMoves[i];
-      input = this.input(moveCandidate);
-      Q = this.activate(input);
+    maxQ = -Infinity;
+    availableMoves.forEach (function(moveCandidate) {
+      input = self.input(moveCandidate);
+      Q = self.activate(input);
       if (Q > maxQ) {
-        chosen = input;
+        chosenStateAction = input;
         maxQ = Q;
-        move = moveCandidate
+        chosenMove = moveCandidate
       }
-    }
+    });
   }
 
   // Do move and get reward
-  this.move(move);
-  reward = this.reward();
+  this.move(chosenMove);
+  var reward = this.reward();
 
   // Update
   // Find the highest new Q value Q(s', a')
-  maxQ = 0;
-  availableMoves = this.availableMoves();
-  for (var i = 0; i < availableMoves.length; i++) {
-    moveCandidate = availableMoves[i];
-    // this uses the new state we're currently in
-    input = this.input(moveCandidate);
-    Q = this.activate(input);
+  maxQ = -Infinity;
+  availableMoves.forEach (function(moveCandidate) {
+    input = self.input(moveCandidate);
+    Q = self.activate(input);
     if (Q > maxQ) {
-      chosen = input;
       maxQ = Q;
-      move = moveCandidate;
     }
-  }
+  });
 
   // do the move again so the neural net is prepared to backpropagate the value
-  var oldQ = this.activate(chosen);
+  var oldQ = this.activate(chosenStateAction);
   var newQ = oldQ + this.learnRate * (reward + this.gamma * maxQ - oldQ);
-  this.propagate(newQ);
-  //console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ + " finalQ = " + this.activate(chosen));
+  //for (i in _.range(10))
+    this.propagate(newQ);
+
+  if (this.debug)
+    console.debug("reward = " + reward + " oldQ = " + oldQ + " newQ = " + newQ +" finalQ = " + this.activate(chosenStateAction));
 
   // finish up
   this.state.previousScore = this.score;
@@ -215,6 +272,10 @@ NeuralNetLearner.prototype.think = function () {
   this.state.moves += 1;
   this.state.totalReward += reward;
 
+};
+
+NeuralNetLearner.prototype.toggleDebug = function () {
+  this.debug = !this.debug;
 };
 
 NeuralNetLearner.prototype.serializeState = function () {
@@ -242,17 +303,27 @@ NeuralNetLearner.prototype.stop = function () {
 
 NeuralNetLearner.prototype.whenGameFinishes = function () {
   NeuralNetLearner.__super__.whenGameFinishes.apply(this, arguments);
-  this.history[this.roundsPlayed] = {
-    score: this.score,
-    reward: this.state.totalReward,
-    highestTile: this.grid.highestTile().value,
-    moves: this.state.moves
+  this.state.gamesPlayed += 1;
+
+  if (this.keepHistory) {
+    if (_.isEmpty(this.history)) {
+      this.history = {
+        score: [],
+        reward: [],
+        highest: [],
+        moves: []
+      }
+    }
+    this.history.score.push(this.score);
+    this.history.reward.push(this.state.totalReward);
+    this.history.highest.push(this.grid.highestTile().value);
+    this.history.moves.push(this.state.moves);
   }
 };
 
 Learner.prototype.showState = function() {
-  // sssshh
-  //this.actuator.showState(this.serializeState());
+  if (this.visualizeState)
+    this.actuator.showState(this.serializeState());
 };
 
 
@@ -302,3 +373,4 @@ NeuralNetLearner.prototype.availableMoves = function () {
 
   return availableMoves;
 };
+
