@@ -237,26 +237,26 @@ NeuralNetLearner.prototype.think = function () {
   //softmax exploration
   var gibsFactors = [];
   var temperature = this.temperature();
- console.log("temp: " + temperature);
+ //console.log("temp: " + temperature);
   availableMoves.forEach (function(moveCandidate) {
     input = self.input(moveCandidate);
     Q = self.activate(input);
     gibsFactors.push(Math.exp(Q/temperature));
     availableStateActions.push(input);
   });
-  console.log(gibsFactors);
+  //console.log(gibsFactors);
 
   var sum = _.sum(gibsFactors);
-  console.log(sum);
+  //console.log(sum);
   gibsFactors = gibsFactors.map(function(factor) {
     return factor / sum;
   });
-  console.log(gibsFactors);
+  //console.log(gibsFactors);
 
   //cumulative distribution
   var distr = prefixSum(gibsFactors);
   // select action
-  console.log(distr);
+  //console.log(distr);
   var poke = Math.random();
   for (var index = 0; index < distr.length; index++) {
     if(poke <= distr[index]){
@@ -319,7 +319,7 @@ NeuralNetLearner.prototype.think = function () {
 //TODO another decreasing schema might be preferred
 NeuralNetLearner.prototype.temperature = function () {
   var t = this.state.moves + 1;
-  return 1 / Math.log(3*t + 0.00001);
+  return 1 / Math.log(2*t + 0.00001);
 };
 
 NeuralNetLearner.prototype.toggleDebug = function () {
