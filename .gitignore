@@ -1,4 +1,6 @@
 .sass-cache/
 
 .idea
-bower_components
+
+# Decided to push bower components for github.io
+#bower_components
