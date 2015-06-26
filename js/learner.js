@@ -32,6 +32,8 @@ Learner = (function(__super) {
     var storedState = this.storageManager.get('learner-state');
     if (storedState)
       this.deserializeState(storedState);
+    else
+      this.resetState();
     this.history = {};
 
     this.inputManager.on("startLearner", this.start.bind(this));
